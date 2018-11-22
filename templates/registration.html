@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <meta name=author content="">
+    <title>Registration</title>
+    <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
+</head>
+<body>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div id="messages">
+        {% for msg in messages %}
+            <p>{{msg}}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+            
+{% block main_content %}
+<h1>Welcome!</h1>
+{% endblock %}
+
+<form id="joinform" action="{{url_for('register')}}" method="post">
+    <h2>Join</h2>
+    <p><label><input type="text" name="username" required pattern="^\w+$"> Username</label></p>
+    <p><label><input type="text" name="name" required pattern="^\w+$"> Name</label></p>
+    <p><label><input type="number" name="gradYear" required pattern="^\w+$"> Graduation Year</label></p>
+    <p><label><input type="email" name="email"> Email</label></p>
+    <p><label><input type="text" name="dorm"> Dorm Location</label></p>
+    <p><label><input type="password" name="password1" required> Password </label></p>
+    <p><label><input type="password" name="password2" required> Password again </label></p>
+    <p><button type="submit">Submit</button></p>
+</form>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+</body>
+</html>

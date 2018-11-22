@@ -1,0 +1,57 @@
+<!--Yuna Gan, Kealani Finegan, Breana Dupree-Jones-->
+<!doctype html>
+
+<html lang='en'>
+
+<title>BuyMe homepage</title>
+<link rel='stylesheet' href="{{url_for('static',filename='style.css')}}">
+
+<body>
+
+<form id="login" method="POST" action="{{url_for('login')}}">
+        <input id="login_username" placeholder="username" name="login_username">
+        <input id="login_password" placeholder="password" name="login_password">
+        <button id="loginbutton" type="submit" name="submit" value="login"> Log In </button> 
+</form>
+<form id="register" methods="[POST,GET]" action="{{url_for('register')}}">
+        <button id="registerbutton" type="submit" name="submit" value="register"> Register </button> 
+</form>
+
+<form id="search" method="POST" action="/search/">
+        <input id="searchterm" placeholder="Search for posts" name="searchterm">
+        <button id="searchbutton" type="submit" name="submit" value="Search"> Search </button> 
+</form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<h1>Items for Sale</h1>
+    
+<table id="posts-list">
+    <tr>
+        <th>Contact</th>
+        <th>Description</th>
+        <th>Price</th>
+        <th>Availability</th>
+        <th>Category</th>
+        <th>Photo</th>
+    </tr>
+
+    {% for post in posts %}
+        <tr class = "tt" data-tt="{post.id}}">
+            <td class="name">{{post.name}}</td>
+            <td class="description">{{post.description}}</td>
+            <td class="price">${{post.price}}</td>
+            <td class="availability">{{post.availability}}</td>
+            <td class="category">{{post.category}}</td>
+            <td class="photo">{{post.photo}}</td>
+            </tr>
+    {% endfor %}
+    </table>
+
+<script>
+/*global $*/
+</script>
+
+
+</body>
+</html>
