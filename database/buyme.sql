@@ -1,8 +1,8 @@
 use c9; 
 
+Drop table if exists posts;
 Drop table if exists user;
 Drop table if exists items;
-Drop table if exists posts;
 Drop table if exists userpass;
 
 create table user(
@@ -12,7 +12,8 @@ create table user(
     gradYear int not null,
     dorm varchar(20) not null,
     email varchar(50) not null,
-    primary key(uid)
+    key username (username),
+    primary key(uid) 
 ) Engine = InnoDB;
 
 create table items (
@@ -31,16 +32,18 @@ create table items (
 ) Engine = InnoDB;
 
 create table posts (
-     uid int,
-     iid int,
+     uid int not null,
+     iid int not null,
+     key uid (uid),
+     key iid (iid),
      primary key (uid,iid),
-     foreign key (uid) references user (uid),
-     foreign key (iid) references items (iid)
+     foreign key (uid) references user (uid) on delete cascade,
+     foreign key (iid) references items (iid) on delete cascade
 ) Engine = InnoDB;
 
-create table userpass(
-       username varchar(50) not null,
-       hashed char(60),
-       primary key (username),
-       foreign key (username) references user (username)
+create table userpass (
+      username varchar(50) not null,
+      hashed char(60),
+      primary key (username),
+      foreign key (username) references user (username) on delete cascade
 ) Engine = InnoDB;

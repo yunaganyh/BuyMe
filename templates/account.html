@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <meta name=author content="">
+    <title>Registration</title>
+    <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
+</head>
+<body>
+<h1>Account</h1>
+<table>
+  <tr>
+    <th>Username</th>
+    <th>Name</th>
+    <th>Graduation Year</th>
+    <th>Dorm location</th>
+    <th>Email</th>
+  </tr>
+  <tr>
+    <td>{{person.username}}</td>
+    <td>{{person.name}}</td>
+    <td>{{person.gradYear}}</td>
+    <td>{{person.dorm}}</td>
+    <td>{{person.email}}</td>
+  </tr>
+</table>
+
+
+<script src="https://code.jquery.com/jquery.js"></script>
+</body>
+</html>
