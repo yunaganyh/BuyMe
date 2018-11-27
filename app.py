@@ -30,26 +30,41 @@ def register():
         try:
             username = request.form['username']
             passwd1 = request.form['password1']
+            print passwd1
             passwd2 = request.form['password2']
+            print passwd2
             if passwd1 != passwd2:
                 flash('passwords do not match')
                 return redirect(request.referrer)
             hashed = bcrypt.hashpw(passwd1.encode('utf-8'), bcrypt.gensalt())
+            print hashed
             row = sqlFunctions.getUser(conn, username)
             if row is not None:
                 flash('That username is taken')
                 return redirect( url_for('register') )
-        #     curs.execute('INSERT into userpass(username,hashed) VALUES(%s,%s)',
-        #                  [username, hashed])
-        #     session['username'] = username
-        #     session['logged_in'] = True
-        #     session['visits'] = 1
-        #     return redirect( url_for('user', username=username) )
+            name = request.form['name']
+            gradYear = request.form['gradYear']
+            email = request.form['email']
+            dorm = request.form['dorm']
+            sqlFunctions.insertUser(conn,username,name,gradYear,dorm,email)
+            sqlFunctions.insertUserpass(conn,username,hashed)
+            session['username'] = username
+            session['logged_in'] = True
+            session['visits'] = 1
+            return redirect( url_for('account', username=username) )
         except Exception as err:
             flash('form submission error '+str(err))
     return redirect(request.referrer)
     
-    
+@app.route('/account/<username>')
+def account(username):
+    conn = getConn()
+    person = sqlFunctions.getUserByUsername(conn,username)
+    if person is None:
+        flash('User does not exists.')
+        return redirect(url_for('login'))
+    return render_template('account.html', person = person)
+
 @app.route('/login/')
 def login():
     conn = getConn()
