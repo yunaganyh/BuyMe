@@ -7,12 +7,25 @@
 <link rel='stylesheet' href="{{url_for('static',filename='style.css')}}">
 
 <body>
+     <div id="flashes">{% block flashes %}
+   {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div id="messages">
+        {% for msg in messages %}
+            <p>{{msg}}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    {% endblock %} 
+    </div>
 
 <form id="login" method="POST" action="{{url_for('login')}}">
         <input id="login_username" placeholder="username" name="login_username">
         <input id="login_password" placeholder="password" name="login_password">
         <button id="loginbutton" type="submit" name="submit" value="login"> Log In </button> 
 </form>
+<p>Logged in as: {{username}}</p>
 <form id="register" methods="[POST,GET]" action="{{url_for('register')}}">
         <button id="registerbutton" type="submit" name="submit" value="register"> Register </button> 
 </form>
