@@ -67,22 +67,17 @@ def account(username):
 
 @app.route('/login/', methods=['POST'])
 def login():
+    conn = getConn()
     try:
         username = request.form['login_username']
         passwd = request.form['login_password']
-        # print(username)
-        conn = getConn()
-        curs = conn.cursor(MySQLdb.cursors.DictCursor)
-        curs.execute('SELECT hashed FROM userpass WHERE username = %s',
-                     [username])
-        row = curs.fetchone()
-        # print passwd
+        row = sqlFunctions.getUserPassword(conn,username)
         if row is None:
             # Same response as wrong password, so no information about what went wrong
-            flash('login incorrect. Try again or join')
-            return redirect( url_for('home'))
+            flash('No account for username. Try again with correct username')
+            return redirect( url_for(request.referrer))
         hashed = row['hashed']
-        if hashed == passwd:
+        if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
             flash('successfully logged in as '+username)
             session['username'] = username
             session['logged_in'] = True

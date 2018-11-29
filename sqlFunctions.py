@@ -38,6 +38,11 @@ def getUserByUsername(conn, username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from user where username = %s''', [username])
     return curs.fetchone()
+    
+def getUserPassword(conn, username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select hashed from userpass where username = %s''', [username])
+    return curs.fetchone()
 
 def check1(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
