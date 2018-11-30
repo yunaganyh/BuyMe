@@ -16,11 +16,11 @@ insert into user (name,username,gradYear,dorm,email) values ('Wendy Wellesley','
 insert into user (name,username,gradYear,dorm,email) values ('Sally Stone','sstone',2021,'Freeman Hall','sstone@wellesley.edu');
 insert into user (name,username,gradYear,dorm,email) values ('Hill Clinton','hclint',2020,'Stone-Davis Hall','hclint@wellesley.edu');
 
+insert into userpass (username,hashed) values ('wwelles','123');
+insert into userpass (username,hashed) values ('sstone','456');
+insert into userpass (username,hashed) values ('hclint','789');
+
 insert into posts (uid,iid) values (1,1);
 insert into posts (uid,iid) values (2,2);
 insert into posts (uid,iid) values (3,3);
 insert into posts (uid,iid) values (1,4);
-
-insert into userpass(username, hashed) values ('wwellesley','scooby');
-insert into userpass(username, hashed) values ('sstone','doo');
-insert into userpass(username, hashed) values ('hclint','abc');

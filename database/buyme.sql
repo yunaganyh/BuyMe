@@ -13,7 +13,7 @@ create table user(
     dorm varchar(20) not null,
     email varchar(50) not null,
     key username (username),
-    primary key(uid) 
+    primary key(uid)
 ) Engine = InnoDB;
 
 create table items (
@@ -46,4 +46,6 @@ create table userpass (
       hashed char(60),
       primary key (username),
       foreign key (username) references user (username) on delete cascade
+      foreign key (uid) references user (uid) on delete cascade on update cascade,
+      foreign key (iid) references items (iid) on delete cascade on update cascade
 ) Engine = InnoDB;

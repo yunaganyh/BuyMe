@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang='en'>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name=author content="">
+    <title>Upload Item to Sell</title>
+    <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
+</head>
+
+<body>
+
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <div id="messages">
+        {% for msg in messages %}
+        <p>{{msg}}</p>
+        {% endfor %}
+    </div>
+    {% endif %} {% endwith %} {% block main_content %}
+    <h1>Welcome!</h1>
+    {% endblock %}
+
+    <form id="joinform" action="{{url_for('uploadpost')}}" method="post">
+        <h2> Upload New Item </h2>
+        <p><label><b><em>Description </em></b><br><textarea rows="4" cols="50" maxlength="100" name="description"></textarea></label></p>
+        <p><label><b><em>Price $ </em></b><br><input type="text" name="price"></label></p>
+        <p><label><b><em>Available? </em></b><br><select name="avail">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select></label></p>
+        <p><label><b><em>Urgency</em></b></label><br>
+            <p>Specify urgency level from 1(lowest) to 5(highest)</p>
+            <input type="radio" name="urgency" value="1"> 1 
+            <input type="radio" name="urgency" value="2"> 2 
+            <input type="radio" name="urgency" value="3"> 3 
+            <input type="radio" name="urgency" value="4"> 4 
+            <input type="radio" name="urgency" value="5"> 5 
+        </p>
+        <p><label><b><em>Category</em></b></label> <br>
+            <input type="radio" name="category" value="food"> food <br>
+            <input type="radio" name="category" value="clothing"> clothing <br>
+            <input type="radio" name="category" value="shoes"> shoes <br>
+            <input type="radio" name="category" value="services"> services <br>
+            <input type="radio" name="category" value="utility"> utility <br>
+            <input type="radio" name="category" value="makeup"> makeup <br>
+            <input type="radio" name="category" value="bath-body"> bath/body <br>
+            <input type="radio" name="category" value="event"> event <br>
+            <input type="radio" name="category" value="other">other <input type="text" name="other" value=""><br></p>
+        <p><label><b><em>Role </em></b><br><select name="role">
+          <option value="seller">Seller</option>
+          <option value="buyer">Buyer</option>
+        </select></label></p>
+        <p><button type="submit">Submit</button></p>
+    </form>
+
+    <script src="https://code.jquery.com/jquery.js"></script>
+</body>
+
+</html>

@@ -8,7 +8,7 @@ import MySQLdb
 # return the connection to MySQLdb 
 def getConn(db):
     conn = MySQLdb.connect(host='localhost',
-                           user='ubuntu',
+                           user='kealani',
                            passwd='',
                            db=db)
     conn.autocommit(True)
@@ -48,3 +48,10 @@ def check1(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from userpass''')
     return curs.fetchone()
+
+def insertNewItem(conn, item):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    print item
+    curs.execute('''insert into items (description, price, availability,urgency, category, other, role) values 
+                    (%s, %s,%s,%s,%s,%s,%s)''', [item['description'], item['price'],item['available'],item['urgency'], item['category'],item['other'],item['role']])
+

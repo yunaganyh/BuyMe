@@ -124,11 +124,34 @@ def logout():
             return redirect( url_for('home') )
     except Exception as err:
         flash('some kind of error '+str(err))
-        return redirect( url_for('home') )
-
+        return redirect( url_for('home'))
     
-    
-    
+@app.route('/upload/', methods=['GET','POST'])
+def uploadpost():
+    conn = getConn()
+    test = True
+    if request.method == 'GET':
+        return render_template('form.html')
+    else:
+        try:
+            description = request.form.get('description')
+            price = request.form.get('price')
+            available = request.form.get('avail')
+            urgency = request.form.get('urgency')
+            category = request.form.get('category')
+            other = request.form.get('other')
+            role = request.form.get('role')
+            item = description + "," + price + "," + available + "," + urgency + "," + category + "," + other + "," + role
+            print item
+            # if 'username' in session:
+            #     username = session['username']
+            itemDict = {'description': description, 'price': price,
+            'available': available, 'urgency': urgency, 'category': category, 'other': other, 'role': role}
+            sqlFunctions.insertNewItem(conn, itemDict)
+            
+        except Exception as err:
+            flash('form submission error '+str(err))
+    return redirect(request.referrer)
 
 if __name__ == '__main__':
     app.debug = True
