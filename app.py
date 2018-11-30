@@ -111,7 +111,7 @@ def login():
         flash('form submission error '+str(err))
         return redirect( url_for('home') )   
 
-@app.route('/logout/')
+@app.route('/logout/', methods=['POST'])
 def logout():
     try:
         if 'username' in session:
@@ -119,13 +119,13 @@ def logout():
             session.pop('username')
             session.pop('logged_in')
             flash('You are logged out')
-            return redirect(url_for('home'))
+            return redirect(request.referrer)
         else:
             flash('you are not logged in. Please login or join')
-            return redirect( url_for('home') )
+            return redirect(request.referrer)
     except Exception as err:
         flash('some kind of error '+str(err))
-        return redirect( url_for('home'))
+        return redirect(request.referrer)
 
 # renders all the posts with items for sale to html template
 @app.route('/sale/')
