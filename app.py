@@ -68,7 +68,6 @@ def register():
 @app.route('/account/', methods=['POST','GET'])
 def account():
     conn = getConn()
-<<<<<<< HEAD
     #check if user is in session
     try: 
         loggedIn = session['logged_in']
@@ -85,15 +84,6 @@ def account():
         return redirect(url_for('home'))
     return render_template('account.html', person = user, posts = posts)
 
-=======
-    person = sqlFunctions.getUserByUsername(conn,username)
-    if person is None:
-        flash('User does not exists.')
-        return redirect(url_for('login'))
-    return render_template('account.html', person = person)
-    
-#logs the user into the app if they are registered in the database
->>>>>>> bend
 @app.route('/login/', methods=['POST'])
 def login():
     conn = getConn()
@@ -113,18 +103,6 @@ def login():
             session['username'] = username
             session['logged_in'] = True
             session['visits'] = 1
-<<<<<<< HEAD
-=======
-            print(username)
-            return redirect( url_for('home') )
-        # the user's password is wrong, ask them to try again and redirect to home page
-        else:
-            flash('login incorrect. Try again or join')
-            return redirect( url_for('home'))
-        # keeps tracks of the user's visits
-        if 'username' in session:
-            session['visits'] = 1+int(session['visits'])
->>>>>>> bend
             return redirect(request.referrer)
         else:
             flash('Wrong password. Please try again')
@@ -132,12 +110,7 @@ def login():
     except Exception as err:
         flash('form submission error '+str(err))
         return redirect( url_for('home') )   
-<<<<<<< HEAD
-        
-=======
 
-#logs the user out of the app
->>>>>>> bend
 @app.route('/logout/')
 def logout():
     try:
