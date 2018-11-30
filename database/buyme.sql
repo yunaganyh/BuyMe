@@ -34,6 +34,7 @@ create table items (
 create table posts (
      uid int not null,
      iid int not null,
+     tupload timestamp,
      key uid (uid),
      key iid (iid),
      primary key (uid,iid),
