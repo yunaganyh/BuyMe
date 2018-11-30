@@ -12,15 +12,18 @@ app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
                                           '0123456789'))
                            for i in range(20) ])
 
+#get connection to c9 database
 def getConn():
     return sqlFunctions.getConn('c9')
-    
+
+#homepage that renders all posts     
 @app.route('/')
 def home():
     conn = getConn()
     posts = sqlFunctions.getItemsAndUsers(conn)
     return render_template('main.html', posts = posts)
 
+#register user and add them into the user database
 @app.route('/register/', methods=['GET','POST'])
 def register():
     conn = getConn()
@@ -28,26 +31,31 @@ def register():
         return render_template('registration.html')
     else:
         try:
+            #retrieve username and password
             username = request.form['username']
             passwd1 = request.form['password1']
-            print passwd1
             passwd2 = request.form['password2']
-            print passwd2
+            #compare passwords and return error if they don't match
             if passwd1 != passwd2:
                 flash('passwords do not match')
                 return redirect(request.referrer)
+            #hash the password
             hashed = bcrypt.hashpw(passwd1.encode('utf-8'), bcrypt.gensalt())
-            print hashed
+            #retrieve user from user table to see if user already exists 
+            #return error if user exists
             row = sqlFunctions.getUserByUsername(conn, username)
             if row is not None:
                 flash('That username is taken')
                 return redirect( url_for('register') )
+            #retrieve user input info
             name = request.form['name']
             gradYear = request.form['gradYear']
             email = request.form['email']
             dorm = request.form['dorm']
+            #insert user into user table and password table
             sqlFunctions.insertUser(conn,username,name,gradYear,dorm,email)
             sqlFunctions.insertUserpass(conn,username,hashed)
+            #create session for user
             session['username'] = username
             session['logged_in'] = True
             session['visits'] = 1
@@ -55,16 +63,20 @@ def register():
         except Exception as err:
             flash('form submission error '+str(err))
     return redirect(request.referrer)
-    
+
+#account page for user    
 @app.route('/account/', methods=['POST','GET'])
 def account():
     conn = getConn()
+    #check if user is in session
     try: 
         loggedIn = session['logged_in']
     except:
         loggedIn = None
+    #show account page if user logged in, redirect to home otherwise
     if loggedIn:
         username = session['username']
+        #retrieve posts by user
         user = sqlFunctions.getUserByUsername(conn,username)
         posts = sqlFunctions.getUserPosts(conn,user)
     else:
@@ -146,7 +158,8 @@ def uploadpost():
         except Exception as err:
             flash('form submission error '+str(err))
     return redirect(request.referrer)
-    
+
+#to be fleshed out
 @app.route('/updatePost/', methods=['POST'])
 def updatePost():
     print request.form['id']
