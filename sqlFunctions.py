@@ -55,3 +55,7 @@ def insertNewItem(conn, item):
     curs.execute('''insert into items (description, price, availability,urgency, category, other, role) values 
                     (%s, %s,%s,%s,%s,%s,%s)''', [item['description'], item['price'],item['available'],item['urgency'], item['category'],item['other'],item['role']])
 
+def getItemsForSale(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from items inner join posts on items.iid=posts.iid where items.role="seller"''')
+    return curs.fetchall()
