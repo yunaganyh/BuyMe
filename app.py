@@ -83,24 +83,17 @@ def login():
         if row is None:
             # Same response as wrong password, so no information about what went wrong
             flash('No account for username. Try again with correct username')
-            return redirect( url_for(request.referrer))
+            return redirect( url_for('home'))
         hashed = row['hashed']
         if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
             flash('successfully logged in as '+username)
             session['username'] = username
             session['logged_in'] = True
             session['visits'] = 1
-            print(username)
-            return redirect( url_for('home') )
-        else:
-            flash('login incorrect. Try again or join')
-            return redirect( url_for('home'))
-        if 'username' in session:
-            session['visits'] = 1+int(session['visits'])
             return redirect(request.referrer)
         else:
-            flash('you are not logged in. Please login or join')
-            return redirect( url_for('home') )
+            flash('Wrong password. Please try again')
+            return redirect( url_for('home'))
     except Exception as err:
         flash('form submission error '+str(err))
         return redirect( url_for('home') )   
@@ -153,6 +146,16 @@ def uploadpost():
         except Exception as err:
             flash('form submission error '+str(err))
     return redirect(request.referrer)
+    
+@app.route('/updatePost/', methods=['POST'])
+def updatePost():
+    print request.form['id']
+    return "hello"
+  
+@app.route('/deletePost/', methods=['POST'])
+def deletePost():  
+    print request.form['id']
+    return "hello"
 
 if __name__ == '__main__':
     app.debug = True

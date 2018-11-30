@@ -37,24 +37,43 @@
     <th>Photo</th>
   </tr>
   {% for post in posts %}
-  <tr>
+  <tr class="post" data-id="{{post.iid}}">
     <td>{{post.description}}</td>
     <td>{{post.price}}</td>
     <td>{{post.availability}}</td>
     <td>{{post.category}}</td>
     <td>{{post.photo}}</td>
-    <td><button class="update-button">Update post</button></td>
-    <!--<td>-->
-    <!--  <form method="post" action="{{url_for('updatePost'}}">-->
-    <!--    <input type="hidden" name="update">-->
-    <!--    <label>1 <input type="button"></label>-->
-    <!--    </form>-->
-    <!--</td>-->
+    <td><button id="update">Update post</button></td>
+    <td>
+      <form method="post" action="{{url_for('updatePost')}}">
+        </form>
+    </td>
+    <td><button  id="delete">Delete post</button></td>
+    <td>
+      <form method="post" action="{{url_for('deletePost')}}">
+        <input type="hidden" name="delete">
+        </form>
+    </td>
   </tr>
   {% endfor %}
 </table>
-
+<div id="dialog-modal" title="dialog" style="display: none;"></div>
 
 <script src="https://code.jquery.com/jquery.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script type="text/javascript">
+  /*global $*/
+$('#update').click(function(){
+    var postID = $(this).closest('tr').data('id');
+    $.post("{{url_for('updatePost')}}",{'id':postID});
+})
+
+$('#delete').click(function(){
+    var postID = $(this).closest('tr').data('id');
+    $.post("{{url_for('updatePost')}}",{'id':postID});
+})
+
+</script>
 </body>
 </html>
