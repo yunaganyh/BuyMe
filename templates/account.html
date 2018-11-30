@@ -8,7 +8,10 @@
 </head>
 <body>
 <h1>Account</h1>
-<table>
+<form id="home" method="POST" action="{{url_for('home')}}">
+        <button id="homebutton" type="submit" name="submit" value="home"> Go to home page </button> 
+</form>
+<table id="user">
   <tr>
     <th>Username</th>
     <th>Name</th>
@@ -23,6 +26,32 @@
     <td>{{person.dorm}}</td>
     <td>{{person.email}}</td>
   </tr>
+</table>
+
+<table id="myPosts">
+  <tr>
+    <th>Description</th>
+    <th>Price</th>
+    <th>Availability</th>
+    <th>Category</th>
+    <th>Photo</th>
+  </tr>
+  {% for post in posts %}
+  <tr>
+    <td>{{post.description}}</td>
+    <td>{{post.price}}</td>
+    <td>{{post.availability}}</td>
+    <td>{{post.category}}</td>
+    <td>{{post.photo}}</td>
+    <td><button class="update-button">Update post</button></td>
+    <!--<td>-->
+    <!--  <form method="post" action="{{url_for('updatePost'}}">-->
+    <!--    <input type="hidden" name="update">-->
+    <!--    <label>1 <input type="button"></label>-->
+    <!--    </form>-->
+    <!--</td>-->
+  </tr>
+  {% endfor %}
 </table>
 
 

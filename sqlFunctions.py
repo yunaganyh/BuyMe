@@ -16,9 +16,16 @@ def getConn(db):
     
 def getItemsAndUsers(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select * from items inner join posts on items.iid=posts.iid inner join user on user.uid=posts.uid''')
+    curs.execute('''select * from items inner join posts on items.iid=posts.iid 
+    inner join user on user.uid=posts.uid''')
     return curs.fetchall()
 
+def getUserPosts(conn,user):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from items inner join posts on items.iid=posts.iid 
+    where posts.uid=%s''',[user['uid']])
+    return curs.fetchall()
+    
 def getUser(conn, uid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from user where uid = %s''',[uid])
@@ -42,9 +49,4 @@ def getUserByUsername(conn, username):
 def getUserPassword(conn, username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select hashed from userpass where username = %s''', [username])
-    return curs.fetchone()
-
-def check1(conn):
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select * from userpass''')
     return curs.fetchone()

@@ -38,7 +38,7 @@ def register():
                 return redirect(request.referrer)
             hashed = bcrypt.hashpw(passwd1.encode('utf-8'), bcrypt.gensalt())
             print hashed
-            row = sqlFunctions.getUser(conn, username)
+            row = sqlFunctions.getUserByUsername(conn, username)
             if row is not None:
                 flash('That username is taken')
                 return redirect( url_for('register') )
@@ -51,19 +51,26 @@ def register():
             session['username'] = username
             session['logged_in'] = True
             session['visits'] = 1
-            return redirect( url_for('account', username=username) )
+            return redirect( url_for('account') )
         except Exception as err:
             flash('form submission error '+str(err))
     return redirect(request.referrer)
     
-@app.route('/account/<username>')
-def account(username):
+@app.route('/account/', methods=['POST','GET'])
+def account():
     conn = getConn()
-    person = sqlFunctions.getUserByUsername(conn,username)
-    if person is None:
-        flash('User does not exists.')
-        return redirect(url_for('login'))
-    return render_template('account.html', person = person)
+    try: 
+        loggedIn = session['logged_in']
+    except:
+        loggedIn = None
+    if loggedIn:
+        username = session['username']
+        user = sqlFunctions.getUserByUsername(conn,username)
+        posts = sqlFunctions.getUserPosts(conn,user)
+    else:
+        flash('User not logged in')
+        return redirect(url_for('home'))
+    return render_template('account.html', person = user, posts = posts)
 
 @app.route('/login/', methods=['POST'])
 def login():

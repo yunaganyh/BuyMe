@@ -30,6 +30,10 @@
         <button id="registerbutton" type="submit" name="submit" value="register"> Register </button> 
 </form>
 
+<form id="account" method="POST" action="{{url_for('account')}}">
+        <button id="account" type="submit" name="submit" value="account"> My Account </button> 
+</form>
+
 <form id="search" method="POST" action="/search/">
         <input id="searchterm" placeholder="Search for posts" name="searchterm">
         <button id="searchbutton" type="submit" name="submit" value="Search"> Search </button> 
