@@ -61,7 +61,6 @@ def getUserPassword(conn, username):
 #insert item into items table
 def insertNewItem(conn, item):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    # print item
     curs.execute('''insert into items (description, price, availability,urgency, category, other, role) values 
                     (%s, %s,%s,%s,%s,%s,%s)''', [item['description'], item['price'],item['available'],item['urgency'], item['category'],item['other'],item['role']])
 

@@ -4,12 +4,13 @@
 <head>
     <meta charset='utf-8'>
     <meta name=author content="">
-    <title>Upload Item to Sell</title>
+    <title>Upload Item</title>
     <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
 </head>
 
 <body>
 
+    <!-- Displays error message if any errors occur in the form submission process -->
     {% with messages = get_flashed_messages() %} {% if messages %}
     <div id="messages">
         {% for msg in messages %}
@@ -17,10 +18,13 @@
         {% endfor %}
     </div>
     {% endif %} {% endwith %} {% block main_content %}
+    
     <h1>Welcome!</h1>
     {% endblock %}
-
-    <form id="joinform" action="{{url_for('uploadpost')}}" method="post">
+    
+    <!-- Upload form that takes all the necessary information for a post 
+    and sends it to the backend, items table -->
+    <form id="uploadform" action="{{url_for('uploadpost')}}" method="post">
         <h2> Upload New Item </h2>
         <p><label><b><em>Description </em></b><br><textarea rows="4" cols="50" maxlength="100" name="description"></textarea></label></p>
         <p><label><b><em>Price $ </em></b><br><input type="text" name="price"></label></p>

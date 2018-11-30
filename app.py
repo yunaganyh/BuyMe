@@ -134,7 +134,13 @@ def getSalePosts():
     # retrieves the posts from the database
     saleposts=sqlFunctions.getItemsForSale(conn, "seller")
     return render_template('forsale.html', saleposts=saleposts)
-    
+
+''' 
+Handles the upload form submission
+Retrieves inputs from the form and creates a dictionary that will be passed into
+a function that extracts the different compenents to insert the item into the 
+Items table
+'''
 @app.route('/upload/', methods=['GET','POST'])
 def uploadpost():
     conn = getConn()
@@ -150,17 +156,19 @@ def uploadpost():
             category = request.form.get('category')
             other = request.form.get('other')
             role = request.form.get('role')
+            #below is for testing purposes
             item = description + "," + price + "," + available + "," + urgency + "," + category + "," + other + "," + role
             print item
+            #below is to assign an item to a specific user -- not yet implemented
             # if 'username' in session:
             #     username = session['username']
             itemDict = {'description': description, 'price': price,
             'available': available, 'urgency': urgency, 'category': category, 'other': other, 'role': role}
-            sqlFunctions.insertNewItem(conn, itemDict)
-            
+            sqlFunctions.insertNewItem(conn, itemDict) #add item to the database
         except Exception as err:
             flash('form submission error '+str(err))
-    return redirect(request.referrer)
+    posts = sqlFunctions.getItemsAndUsers(conn) #return to main page and pass in updated item list
+    return render_template('main.html', posts = posts)
 
 #to be fleshed out
 @app.route('/updatePost/', methods=['POST'])
