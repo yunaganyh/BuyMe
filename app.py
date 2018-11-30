@@ -64,20 +64,22 @@ def account(username):
         flash('User does not exists.')
         return redirect(url_for('login'))
     return render_template('account.html', person = person)
-
+    
+#logs the user into the app if they are registered in the database
 @app.route('/login/', methods=['POST'])
 def login():
     conn = getConn()
     try:
         username = request.form['login_username']
         passwd = request.form['login_password']
-    
+        #retrieves the user's password from the database
         row = sqlFunctions.getUserPassword(conn,username)
         if row is None:
             # Same response as wrong password, so no information about what went wrong
             flash('No account for username. Try again with correct username')
             return redirect( url_for(request.referrer))
         hashed = row['hashed']
+        #compares the user's input to the hashed password
         if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
             flash('successfully logged in as '+username)
             session['username'] = username
@@ -85,9 +87,11 @@ def login():
             session['visits'] = 1
             print(username)
             return redirect( url_for('home') )
+        # the user's password is wrong, ask them to try again and redirect to home page
         else:
             flash('login incorrect. Try again or join')
             return redirect( url_for('home'))
+        # keeps tracks of the user's visits
         if 'username' in session:
             session['visits'] = 1+int(session['visits'])
             return redirect(request.referrer)
@@ -97,6 +101,8 @@ def login():
     except Exception as err:
         flash('form submission error '+str(err))
         return redirect( url_for('home') )   
+
+#logs the user out of the app
 @app.route('/logout/')
 def logout():
     try:
@@ -111,11 +117,13 @@ def logout():
             return redirect( url_for('home') )
     except Exception as err:
         flash('some kind of error '+str(err))
-        return redirect( url_for('home') )
-
+        return redirect( url_for('home'))
+        
+# renders all the posts with items being sold to html template
 @app.route('/sale/')
 def getSalePosts():
     conn = getConn()
+    # retrieves the post from the database
     saleposts=sqlFunctions.getItemsForSale(conn)
     return render_template('forsale.html', saleposts=saleposts)
     

@@ -48,7 +48,8 @@ def check1(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from userpass''')
     return curs.fetchone()
-
+    
+#gets the items that are for sale from the database
 def getItemsForSale(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from items inner join posts on items.iid=posts.iid where items.role="seller"''')
