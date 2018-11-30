@@ -78,24 +78,26 @@ def login():
     try:
         username = request.form['login_username']
         passwd = request.form['login_password']
+    
+        row = sqlFunctions.getUserPassword(conn,username)
+        if row is None:
+            # Same response as wrong password, so no information about what went wrong
+            flash('No account for username. Try again with correct username')
+            return redirect( url_for(request.referrer))
+        hashed = row['hashed']
+        if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
+            flash('successfully logged in as '+username)
+            session['username'] = username
+            session['logged_in'] = True
+            session['visits'] = 1
+            print(username)
+            return redirect( url_for('home') )
+        else:
+            flash('login incorrect. Try again or join')
+            return redirect( url_for('home'))
         if 'username' in session:
-            row = sqlFunctions.getUserPassword(conn,username)
-            # session['visits'] = 1+int(session['visits'])
-            if row is None:
-                # Same response as wrong password, so no information about what went wrong
-                flash('No account for username. Try again with correct username')
-                return redirect( url_for(request.referrer))
-            hashed = row['hashed']
-            if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
-                flash('successfully logged in as '+username)
-                session['username'] = username
-                session['logged_in'] = True
-                session['visits'] = 1
-                print(username)
-                return redirect( url_for('home') )
-            else:
-                flash('login incorrect. Try again or join')
-                return redirect( url_for('home'))
+            session['visits'] = 1+int(session['visits'])
+            return redirect(request.referrer)
         else:
             flash('you are not logged in. Please login or join')
             return redirect( url_for('home') )
