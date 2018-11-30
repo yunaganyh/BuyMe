@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1>Items for Sale</h1>
+        
+        <table>
+            {% for item in saleposts%}
+            <tr id={{item.iid}}> 
+                <td>{{item.description}}</td>
+                <td>{{item.category}}</td>
+                <td>{{item.price}}</td>
+                <td>{{item.availability}}</td>
+                <td>{{item.urgency}}</td>
+                <td>{{item.check}}</td>
+                <td>{{item.photo}}</td>
+                <td>{{item.other}}</td>
+            </tr>
+            {%endfor%}
+        </table>    
+    </body>
+
+</html>
+
