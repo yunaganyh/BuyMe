@@ -50,3 +50,19 @@ def getUserPassword(conn, username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select hashed from userpass where username = %s''', [username])
     return curs.fetchone()
+
+def check1(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from userpass''')
+    return curs.fetchone()
+
+def insertNewItem(conn, item):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    print item
+    curs.execute('''insert into items (description, price, availability,urgency, category, other, role) values 
+                    (%s, %s,%s,%s,%s,%s,%s)''', [item['description'], item['price'],item['available'],item['urgency'], item['category'],item['other'],item['role']])
+
+def getItemsForSale(conn, role):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from items inner join posts on items.iid=posts.iid where items.role="%s"''',[role])
+    return curs.fetchall()

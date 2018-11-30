@@ -78,45 +78,31 @@ def login():
     try:
         username = request.form['login_username']
         passwd = request.form['login_password']
-        row = sqlFunctions.getUserPassword(conn,username)
-        if row is None:
-            # Same response as wrong password, so no information about what went wrong
-            flash('No account for username. Try again with correct username')
-            return redirect( url_for(request.referrer))
-        hashed = row['hashed']
-        if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
-            flash('successfully logged in as '+username)
-            session['username'] = username
-            session['logged_in'] = True
-            session['visits'] = 1
-            print(username)
-            return redirect( url_for('user', username=username) )
-        else:
-            flash('login incorrect. Try again or join')
-            return redirect( url_for('home'))
-    except Exception as err:
-        flash('form submission error '+str(err))
-        return redirect( url_for('home') )   
-
-@app.route('/user/<username>')
-def user(username):
-    try:
-        # don't trust the URL; it's only there for decoration
-        conn = getConn()
-        posts = sqlFunctions.getItemsAndUsers(conn)
         if 'username' in session:
-            username = session['username']
-            session['visits'] = 1+int(session['visits'])
-            return render_template('main.html',posts=posts,
-                                   username=username,
-                                   visits=session['visits'])
+            row = sqlFunctions.getUserPassword(conn,username)
+            # session['visits'] = 1+int(session['visits'])
+            if row is None:
+                # Same response as wrong password, so no information about what went wrong
+                flash('No account for username. Try again with correct username')
+                return redirect( url_for(request.referrer))
+            hashed = row['hashed']
+            if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
+                flash('successfully logged in as '+username)
+                session['username'] = username
+                session['logged_in'] = True
+                session['visits'] = 1
+                print(username)
+                return redirect( url_for('home') )
+            else:
+                flash('login incorrect. Try again or join')
+                return redirect( url_for('home'))
         else:
             flash('you are not logged in. Please login or join')
             return redirect( url_for('home') )
     except Exception as err:
-        flash('some kind of error '+str(err))
-        return redirect( url_for('home') )
-
+        flash('form submission error '+str(err))
+        return redirect( url_for('home') )   
+        
 @app.route('/logout/')
 def logout():
     try:
@@ -131,11 +117,40 @@ def logout():
             return redirect( url_for('home') )
     except Exception as err:
         flash('some kind of error '+str(err))
-        return redirect( url_for('home') )
+        return redirect( url_for('home'))
 
+@app.route('/sale/')
+def getSalePosts():
+    conn = getConn()
+    saleposts=sqlFunctions.getItemsForSale(conn, "seller")
+    return render_template('forsale.html', saleposts=saleposts)
     
-    
-    
+@app.route('/upload/', methods=['GET','POST'])
+def uploadpost():
+    conn = getConn()
+    test = True
+    if request.method == 'GET':
+        return render_template('form.html')
+    else:
+        try:
+            description = request.form.get('description')
+            price = request.form.get('price')
+            available = request.form.get('avail')
+            urgency = request.form.get('urgency')
+            category = request.form.get('category')
+            other = request.form.get('other')
+            role = request.form.get('role')
+            item = description + "," + price + "," + available + "," + urgency + "," + category + "," + other + "," + role
+            print item
+            # if 'username' in session:
+            #     username = session['username']
+            itemDict = {'description': description, 'price': price,
+            'available': available, 'urgency': urgency, 'category': category, 'other': other, 'role': role}
+            sqlFunctions.insertNewItem(conn, itemDict)
+            
+        except Exception as err:
+            flash('form submission error '+str(err))
+    return redirect(request.referrer)
 
 if __name__ == '__main__':
     app.debug = True
