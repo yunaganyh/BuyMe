@@ -17,7 +17,7 @@ def getConn():
     return sqlFunctions.getConn('c9')
 
 #homepage that renders all posts     
-@app.route('/')
+@app.route('/', methods=['GET','POST'])
 def home():
     conn = getConn()
     posts = sqlFunctions.getItemsAndUsers(conn)
@@ -142,7 +142,7 @@ a function that extracts the different compenents to insert the item into the
 Items table
 '''
 @app.route('/upload/', methods=['GET','POST'])
-def uploadpost():
+def uploadPost():
     conn = getConn()
     test = True
     if request.method == 'GET':
@@ -170,11 +170,35 @@ def uploadpost():
     posts = sqlFunctions.getItemsAndUsers(conn) #return to main page and pass in updated item list
     return render_template('main.html', posts = posts)
 
+@app.route('/retrievePost/', methods=['POST'])
+def retrievePost():
+    conn = getConn()
+    iid = request.form['iid']
+    item = sqlFunctions.getItemByID(conn, iid)
+    return jsonify(item)
+    
 #to be fleshed out
 @app.route('/updatePost/', methods=['POST'])
 def updatePost():
-    print request.form['id']
-    return "hello"
+    conn = getConn()
+    try:
+        iid = request.form['iid']
+        print request.form
+        if 'description' in request.form:
+            sqlFunctions.updatePostDescription(conn, request.form['description'],iid)
+        if 'price' in request.form:
+            sqlFunctions.updatePostPrice(conn, request.form['price'],iid)
+        if 'avail' in request.form:
+            sqlFunctions.updatePostAvailability(conn, request.form['availability'], iid)
+        if 'urgency' in request.form:
+            sqlFunctions.updatePostUrgency(conn, request.form['urgency'], iid)
+        if 'category' in request.form:
+            sqlFunctions.updatePostCategory(conn, request.form['category'].replace('-','/'), iid)
+        if 'other' in request.form:
+            sqlFunctions.updatePostOther(conn, request.form['other'], iid)
+    except:
+        flash('Invalid item')
+    return redirect(request.referrer)
   
 @app.route('/deletePost/', methods=['POST'])
 def deletePost():  

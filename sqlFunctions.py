@@ -69,3 +69,49 @@ def getItemsForSale(conn, role):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from items inner join posts on items.iid=posts.iid where items.role=%s''',[role])
     return curs.fetchall()
+
+#get item by ID:
+def getItemByID(conn, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from items where iid=%s''',[iid])
+    return curs.fetchone()
+    
+#delete post from posts table
+def deletePost(conn, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''delete from posts where iid = %s''', [iid])
+
+#update posts with new description
+def updatePostDescription(conn, description,iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''update items set description = %s where iid=%s''',[description,iid])
+    
+#update posts with new price
+def updatePostPrice(conn, price, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''update items set price = %s where iid=%s''',[price, iid])
+
+#update posts with new availability
+def updatePostAvailability(conn, availability, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''update items set availability = %s where iid=%s''',[availability, iid])
+
+#update posts with new urgency
+def updatePostUrgency(conn, urgency, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''update items set urgency = %s where iid=%s''',[urgency, iid])
+    
+#update posts with new category
+def updatePostCategory(conn, category, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''update items set category = %s where iid=%s''',[category, iid])
+
+#update posts with new other description
+def updatePostOther(conn, other, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''update items set other = %s where iid=%s''',[other, iid])
+
+#update posts with new photo
+def updatePostPhoto(conn, photo, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''update items set photo = %s where iid=%s''',[photo,iid])
