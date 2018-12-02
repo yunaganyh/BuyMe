@@ -57,22 +57,98 @@
   </tr>
   {% endfor %}
 </table>
-<div id="dialog-modal" title="dialog" style="display: none;"></div>
+
+<div id="updateDialog" title="Update Details For Item">
+  <form id="updateForm" method='POST'>
+        <h2 id="itemTitle"> Update Item </h2>
+        <p><label><b><em>Description </em></b><br><textarea id="description" rows="4" cols="50" maxlength="100" name="description"></textarea></label></p>
+        <p><label><b><em>Price $ </em></b><br><input id="price" type="text" name="price"></label></p>
+        <p><label><b><em>Available? </em></b><br><select id="availability" name="avail">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select></label></p>
+        <p><label><b><em>Urgency</em></b></label><br>
+            <p>Specify urgency level from 1(lowest) to 5(highest)</p>
+            <input type="radio" name="urgency" value="1" id="1"> 1 
+            <input type="radio" name="urgency" value="2" id="2"> 2 
+            <input type="radio" name="urgency" value="3" id="3"> 3 
+            <input type="radio" name="urgency" value="4" id="4"> 4 
+            <input type="radio" name="urgency" value="5" id="5"> 5 
+        </p>
+        <p><label><b><em>Category</em></b></label> <br>
+            <input type="radio" name="category" value="food" id="food"> food <br>
+            <input type="radio" name="category" value="clothing" id="clothing"> clothing <br>
+            <input type="radio" name="category" value="shoes" id="shoes"> shoes <br>
+            <input type="radio" name="category" value="services" id="services"> services <br>
+            <input type="radio" name="category" value="utility" id="utility"> utility <br>
+            <input type="radio" name="category" value="makeup" id="makeup"> makeup <br>
+            <input type="radio" name="category" value="bath-body" id="bath-body"> bath/body <br>
+            <input type="radio" name="category" value="event" id="event"> event <br>
+            <input type="radio" name="category" value="other" id="other">other 
+            <input type="text" name="other" value="" id="otherDesc"><br></p>
+        <p><button type="submit" id="updateButton">Update</button></p>
+    </form>
+</div>
 
 <script src="https://code.jquery.com/jquery.js"></script>
+<script src="https://code.jquery.com/jquery-1.9.1.js"></script> 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+
 <script type="text/javascript">
   /*global $*/
 $('#update').click(function(){
     var postID = $(this).closest('tr').data('id');
-    $.post("{{url_for('updatePost')}}",{'id':postID});
+    $.post("{{url_for('retrievePost')}}",{'iid':postID}, fillDialogForm);
+    $("#updateDialog").dialog("open");
 })
 
 $('#delete').click(function(){
     var postID = $(this).closest('tr').data('id');
     $.post("{{url_for('updatePost')}}",{'id':postID});
 })
+
+$('#updateButton').click(function(){
+  var iid = $('#updateDialog').data('iid');
+  var description = $('#description').val();
+  var price = $('#price').val();
+  var avail = $('#availability').val();
+  var urgency = $("input[name=urgency]:checked").val();
+  var category = $("input[name=category]:checked").val();
+  var otherDesc = $('#otherDesc').val();
+  $.post("{{url_for('updatePost')}}",{'description':description,'availability':avail,
+                                      'price': price,'urgency':urgency,'category':category,
+                                      'otherDesc':otherDesc,'iid':iid})
+})
+
+function fillDialogForm(obj){
+  $('#updateDialog').data('iid',obj['iid']);
+  $('#updateDialog #itemTitle').text('Update item ' + obj['iid']);
+  $('#updateDialog #description').val(obj['description']);
+  $('#updateDialog #price').val(obj['price']);
+  $('#updateDialog #availability').val(obj['availability']);
+  $("#" + obj['category'].replace('/','-')).prop("checked", true);
+  $('#' + obj['urgency']).prop("checked",true);
+}
+
+$(document).ready(function () {
+    $(function () {
+        $("#updateDialog").dialog({
+
+            autoOpen: false,
+            modal: true,
+            show: {
+                effect: "blind",
+                duration: 1000
+            },
+            hide: {
+                effect: "explode",
+                duration: 1000
+            }
+        });
+    });
+});
 
 </script>
 </body>
