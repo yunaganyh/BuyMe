@@ -4,6 +4,7 @@ Drop table if exists posts;
 Drop table if exists user;
 Drop table if exists items;
 Drop table if exists userpass;
+Drop table if exists messages;
 
 create table user(
     uid int auto_increment,
@@ -28,6 +29,7 @@ create table items (
 	other varchar(30),
 	photo blob,
     role enum('buyer', 'seller') not null,
+    uploaded timestamp DEFAULT CURRENT_TIMESTAMP,
     primary key(iid)
 ) Engine = InnoDB;
 
@@ -46,6 +48,5 @@ create table userpass (
       hashed char(60),
       primary key (username),
       foreign key (username) references user (username) on delete cascade
-      foreign key (uid) references user (uid) on delete cascade on update cascade,
-      foreign key (iid) references items (iid) on delete cascade on update cascade
 ) Engine = InnoDB;
+

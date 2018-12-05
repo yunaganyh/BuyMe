@@ -39,7 +39,7 @@
         <button id="account" type="submit" name="submit" value="account"> My Account </button> 
 </form>
 
-<form id="account" method="GET" action="{{url_for('uploadpost')}}">
+<form id="account" method="GET" action="{{url_for('uploadPost')}}">
         <button id="upload" type="submit" name="submit" value="upload"> Upload Item </button> 
 </form>
 
@@ -60,6 +60,7 @@
         <th>Availability</th>
         <th>Category</th>
         <th>Photo</th>
+        <th>Time Uploaded</th>
     </tr>
 
     {% for post in posts %}
@@ -70,6 +71,7 @@
             <td class="availability">{{post.availability}}</td>
             <td class="category">{{post.category}}</td>
             <td class="photo">{{post.photo}}</td>
+            <td class="time">{{post.uploaded}}</td>
             </tr>
     {% endfor %}
     </table>
