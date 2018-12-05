@@ -50,3 +50,15 @@ create table userpass (
       foreign key (username) references user (username) on delete cascade
 ) Engine = InnoDB;
 
+create table messages (
+    messageId int auto_increment,
+    sender int not null,
+    receiver int not null,
+    message varchar(200) not null,
+    read enum('true','false') not null,
+    primary key(messageId)
+)
+Engine = InnoDB;
+
+
+
