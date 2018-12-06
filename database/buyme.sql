@@ -46,6 +46,4 @@ create table userpass (
       hashed char(60),
       primary key (username),
       foreign key (username) references user (username) on delete cascade
-      foreign key (uid) references user (uid) on delete cascade on update cascade,
-      foreign key (iid) references items (iid) on delete cascade on update cascade
 ) Engine = InnoDB;
