@@ -37,23 +37,25 @@
     <th>Photo</th>
   </tr>
   {% for post in posts %}
-  <tr class="post" data-id="{{post.iid}}">
-    <td>{{post.description}}</td>
-    <td>{{post.price}}</td>
-    <td>{{post.availability}}</td>
-    <td>{{post.category}}</td>
-    <td>{{post.photo}}</td>
-    <td><button id="update">Update post</button></td>
+  <tr class="post" data-iid="{{post.iid}}">
+    <td class="description">{{post.description}}</td>
+    <td class="price">{{post.price}}</td>
+    <td class="availability">{{post.availability}}</td>
+    <td class="category">{{post.category}}</td>
+    <td class="photo">{{post.photo}}</td>
+    {% if isUser %}
+    <td><button id="update" name="update" type="submit">Update post</button></td>
     <td>
       <form method="post" action="{{url_for('updatePost')}}">
         </form>
     </td>
-    <td><button  id="delete">Delete post</button></td>
+    <td><button type="submit" id="delete">Delete post</button></td>
     <td>
-      <form method="post" action="{{url_for('deletePost')}}">
+      <form method="post" name="delete" action="{{url_for('deletePost')}}">
         <input type="hidden" name="delete">
         </form>
     </td>
+    {% endif %}
   </tr>
   {% endfor %}
 </table>
@@ -61,6 +63,7 @@
 <div id="updateDialog" title="Update Details For Item">
   <form id="updateForm" method='POST'>
         <h2 id="itemTitle"> Update Item </h2>
+        <input type="hidden" name="iid" id="iid" value="">
         <p><label><b><em>Description </em></b><br><textarea id="description" rows="4" cols="50" maxlength="100" name="description"></textarea></label></p>
         <p><label><b><em>Price $ </em></b><br><input id="price" type="text" name="price"></label></p>
         <p><label><b><em>Available? </em></b><br><select id="availability" name="avail">
@@ -98,32 +101,62 @@
 
 <script type="text/javascript">
   /*global $*/
+
+
 $('#update').click(function(){
-    var postID = $(this).closest('tr').data('id');
+    var postID = $(this).closest('tr').data('iid');
     $.post("{{url_for('retrievePost')}}",{'iid':postID}, fillDialogForm);
     $("#updateDialog").dialog("open");
 })
 
 $('#delete').click(function(){
-    var postID = $(this).closest('tr').data('id');
-    $.post("{{url_for('updatePost')}}",{'id':postID});
+    var postID = $(this).closest('tr').data('iid');
+    $.post("{{url_for('deletePost')}}",{'iid':postID});
 })
 
 $('#updateButton').click(function(){
   var iid = $('#updateDialog').data('iid');
+  console.log(iid);
   var description = $('#description').val();
   var price = $('#price').val();
   var avail = $('#availability').val();
   var urgency = $("input[name=urgency]:checked").val();
   var category = $("input[name=category]:checked").val();
   var otherDesc = $('#otherDesc').val();
-  $.post("{{url_for('updatePost')}}",{'description':description,'availability':avail,
+  $.post("{{url_for('updatePost')}}",
+                {'description':description,'availability':avail,
                                       'price': price,'urgency':urgency,'category':category,
-                                      'otherDesc':otherDesc,'iid':iid})
+                                      'otherDesc':otherDesc,'iid':iid}, 
+                updatePostInfo)
 })
+
+function updatePostInfo(obj) {
+  var iid = obj['iid'];
+  var post = $("[data-iid='" + iid + "']");
+  if (obj['description']) {
+    post.find('.description').text(obj['description']);
+  }
+  console.log(post.find('.description').text());
+  if (obj['availability']){
+    post.find('.availability').text(obj['availability']);
+  }
+  if (obj['price']){
+    post.find('.price').text(obj['price']);
+  }
+  if (obj['urgency']){
+    post.find('.urgency').text(obj['urgency']);
+  }
+  if (obj['category']){
+    post.find('.category').text(obj['category']);
+  }
+  if (obj['other']){
+    post.find('.otherDesc').text(obj['other']);
+  }
+}
 
 function fillDialogForm(obj){
   $('#updateDialog').data('iid',obj['iid']);
+  $('#updateDialog #iid').val(obj['iid']);
   $('#updateDialog #itemTitle').text('Update item ' + obj['iid']);
   $('#updateDialog #description').val(obj['description']);
   $('#updateDialog #price').val(obj['price']);

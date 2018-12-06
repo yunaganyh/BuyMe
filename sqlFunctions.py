@@ -67,7 +67,7 @@ def insertNewItem(conn, item):
 #retrieve items based on whether role is seller or buyer
 def getItemsForSale(conn, role):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select * from items inner join posts on items.iid=posts.iid where items.role=%s''',[role])
+    curs.execute('''select items.*,posts.* from items inner join posts on items.iid=posts.iid where items.role=%s''',[role])
     return curs.fetchall()
 
 #get item by ID:

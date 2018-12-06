@@ -5,28 +5,26 @@ import sys,os
 from werkzeug import secure_filename
 import bcrypt
 import sqlFunctions
+import time
+from datetime import datetime, timedelta
 app = Flask(__name__)
 
 app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
                                           'abcdefghijklmnopqrstuvxyz' +
                                           '0123456789'))
                            for i in range(20) ])
-
-#get connection to c9 database
-def getConn():
-    return sqlFunctions.getConn('c9')
-
+                           
 #homepage that renders all posts     
 @app.route('/', methods=['GET','POST'])
 def home():
-    conn = getConn()
+    conn = sqlFunctions.getConn('c9')
     posts = sqlFunctions.getItemsAndUsers(conn)
     return render_template('main.html', posts = posts)
 
 #register user and add them into the user database
 @app.route('/register/', methods=['GET','POST'])
 def register():
-    conn = getConn()
+    conn = sqlFunctions.getConn('c9')
     if request.method == 'GET':
         return render_template('registration.html')
     else:
@@ -59,15 +57,17 @@ def register():
             session['username'] = username
             session['logged_in'] = True
             session['visits'] = 1
-            return redirect( url_for('account') )
+            return redirect( url_for('account',usernameInput=username) )
         except Exception as err:
             flash('form submission error '+str(err))
     return redirect(request.referrer)
 
 #account page for user    
-@app.route('/account/', methods=['POST','GET'])
-def account():
-    conn = getConn()
+@app.route('/account/', defaults={'usernameInput':''}, methods=['POST'])
+@app.route('/account/<usernameInput>', methods=['POST','GET'])
+def account(usernameInput):
+    print request.method
+    conn = sqlFunctions.getConn('c9')
     #check if user is in session
     try: 
         loggedIn = session['logged_in']
@@ -77,16 +77,24 @@ def account():
     if loggedIn:
         username = session['username']
         #retrieve posts by user
-        user = sqlFunctions.getUserByUsername(conn,username)
-        posts = sqlFunctions.getUserPosts(conn,user)
+        if request.method == 'POST':
+            return redirect(url_for('account',usernameInput=username))
+        if username == usernameInput:
+            user = sqlFunctions.getUserByUsername(conn,username)
+            posts = sqlFunctions.getUserPosts(conn,user)
+            isUser = True
+        elif username != usernameInput and usernameInput != '':
+            user = sqlFunctions.getUserByUsername(conn, usernameInput)
+            posts = sqlFunctions.getUserPosts(conn, user)
+            isUser = False
+        return render_template('account.html', person = user, posts = posts, isUser = isUser)
     else:
         flash('User not logged in')
         return redirect(url_for('home'))
-    return render_template('account.html', person = user, posts = posts)
 
 @app.route('/login/', methods=['POST'])
 def login():
-    conn = getConn()
+    conn = sqlFunctions.getConn('c9')
     try:
         username = request.form['login_username']
         passwd = request.form['login_password']
@@ -103,6 +111,7 @@ def login():
             session['username'] = username
             session['logged_in'] = True
             session['visits'] = 1
+            session.permanent = True
             return redirect(request.referrer)
         else:
             flash('Wrong password. Please try again')
@@ -130,7 +139,7 @@ def logout():
 # renders all the posts with items for sale to html template
 @app.route('/sale/')
 def getSalePosts():
-    conn = getConn()
+    conn = sqlFunctions.getConn('c9')
     # retrieves the posts from the database
     saleposts=sqlFunctions.getItemsForSale(conn, "seller")
     return render_template('forsale.html', saleposts=saleposts)
@@ -143,7 +152,7 @@ Items table
 '''
 @app.route('/upload/', methods=['GET','POST'])
 def uploadPost():
-    conn = getConn()
+    conn = sqlFunctions.getConn('c9')
     test = True
     if request.method == 'GET':
         return render_template('form.html')
@@ -172,7 +181,7 @@ def uploadPost():
 
 @app.route('/retrievePost/', methods=['POST'])
 def retrievePost():
-    conn = getConn()
+    conn = sqlFunctions.getConn('c9')
     iid = request.form['iid']
     item = sqlFunctions.getItemByID(conn, iid)
     return jsonify(item)
@@ -180,10 +189,9 @@ def retrievePost():
 #to be fleshed out
 @app.route('/updatePost/', methods=['POST'])
 def updatePost():
-    conn = getConn()
+    conn = sqlFunctions.getConn('c9')
     try:
         iid = request.form['iid']
-        print request.form
         if 'description' in request.form:
             sqlFunctions.updatePostDescription(conn, request.form['description'],iid)
         if 'price' in request.form:
@@ -196,14 +204,19 @@ def updatePost():
             sqlFunctions.updatePostCategory(conn, request.form['category'].replace('-','/'), iid)
         if 'other' in request.form:
             sqlFunctions.updatePostOther(conn, request.form['other'], iid)
+        return jsonify(sqlFunctions.getItemByID(conn,iid))
     except:
         flash('Invalid item')
-    return redirect(request.referrer)
+    return jsonify({})
   
 @app.route('/deletePost/', methods=['POST'])
 def deletePost():  
-    print request.form['id']
-    return "hello"
+    conn = sqlFunctions.getConn('c9')
+    sqlFunctions.deletePost(conn, request.form['iid'])
+
+# @app.route('/checkUser/')
+# def checkUser():
+    
 
 if __name__ == '__main__':
     app.debug = True

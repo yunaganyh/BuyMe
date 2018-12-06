@@ -28,15 +28,15 @@
 <p>Logged in as: {{username}}</p>
 
 <form id="logout" method="POST" action="{{url_for('logout')}}">
-        <button id="logout" type="submit" name="submit" value="logout"> Log Out </button> 
+        <button id="logout" type="submit"> Log Out </button> 
 </form>
 
-<form id="register" methods="[POST,GET]" action="{{url_for('register')}}">
-        <button id="registerbutton" type="submit" name="submit" value="register"> Register </button> 
+<form id="register" methods="POST" action="{{url_for('register')}}">
+        <button id="registerbutton" type="submit"> Register </button> 
 </form>
 
-<form id="account" method="POST" action="{{url_for('account')}}">
-        <button id="account" type="submit" name="submit" value="account"> My Account </button> 
+<form id="account" method='POST' action="{{url_for('account')}}">
+        <button id="account" type="submit"> My Account </button> 
 </form>
 
 <form id="account" method="GET" action="{{url_for('uploadPost')}}">
