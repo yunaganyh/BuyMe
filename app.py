@@ -21,6 +21,7 @@ def getConn():
 def home():
     conn = getConn()
     posts = sqlFunctions.getItemsAndUsers(conn)
+    # print posts
     return render_template('main.html', posts = posts)
 
 #register user and add them into the user database
@@ -133,6 +134,7 @@ def getSalePosts():
     conn = getConn()
     # retrieves the posts from the database
     saleposts=sqlFunctions.getItemsForSale(conn, "seller")
+    print saleposts
     return render_template('forsale.html', saleposts=saleposts)
 
 ''' 
@@ -156,15 +158,20 @@ def uploadPost():
             category = request.form.get('category')
             other = request.form.get('other')
             role = request.form.get('role')
-            #below is for testing purposes
-            item = description + "," + price + "," + available + "," + urgency + "," + category + "," + other + "," + role
-            print item
-            #below is to assign an item to a specific user -- not yet implemented
-            # if 'username' in session:
-            #     username = session['username']
             itemDict = {'description': description, 'price': price,
             'available': available, 'urgency': urgency, 'category': category, 'other': other, 'role': role}
             sqlFunctions.insertNewItem(conn, itemDict) #add item to the database
+            
+            # below is to assign an item to a specific user
+            # status = ('username' in session)
+            # print status
+            if 'username' in session:
+                username = session['username']
+                uid = sqlFunctions.getUserByUsername(conn,username)
+                iid = sqlFunctions.getLatestItem(conn)
+                print uid
+                print iid
+                sqlFunctions.insertNewPost(conn,uid,iid) #add uid and iid to post table
         except Exception as err:
             flash('form submission error '+str(err))
     posts = sqlFunctions.getItemsAndUsers(conn) #return to main page and pass in updated item list
