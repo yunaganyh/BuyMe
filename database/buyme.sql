@@ -55,8 +55,11 @@ create table messages (
     sender int not null,
     receiver int not null,
     message varchar(200) not null,
-    read enum('true','false') not null,
-    primary key(messageId)
+    readMessage enum('true','false') not null,
+    messageSent timestamp DEFAULT CURRENT_TIMESTAMP,
+    primary key(messageId, sender, receiver),
+    foreign key (sender) references user (uid) on delete cascade,
+    foreign key (receiver) references user (uid) on delete cascade
 )
 Engine = InnoDB;
 
