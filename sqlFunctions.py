@@ -8,7 +8,7 @@ import MySQLdb
 # return the connection to MySQLdb 
 def getConn(db):
     conn = MySQLdb.connect(host='localhost',
-                           user='ubuntu',
+                           user='kealani',
                            passwd='',
                            db=db)
     conn.autocommit(True)
@@ -64,6 +64,13 @@ def insertNewItem(conn, item):
     curs.execute('''insert into items (description, price, availability,urgency, category, other, role) values 
                     (%s, %s,%s,%s,%s,%s,%s)''', [item['description'], item['price'],item['available'],item['urgency'], item['category'],item['other'],item['role']])
 
+def insertNewPost(conn,userDict,iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    uid = userDict['uid']
+    iid = iid['max(iid)']
+    curs.execute('''insert into posts (uid,iid) values 
+                    (%s,%s)''', [uid,iid])
+    
 #retrieve items based on whether role is seller or buyer
 def getItemsForSale(conn, role):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
@@ -74,6 +81,11 @@ def getItemsForSale(conn, role):
 def getItemByID(conn, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from items where iid=%s''',[iid])
+    return curs.fetchone()
+
+def getLatestItem(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select max(iid) from items''')
     return curs.fetchone()
     
 #delete post from posts table
