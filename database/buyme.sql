@@ -1,10 +1,10 @@
 use c9; 
 
 Drop table if exists posts;
-Drop table if exists user;
-Drop table if exists items;
 Drop table if exists userpass;
 Drop table if exists messages;
+Drop table if exists items;
+Drop table if exists user;
 
 create table user(
     uid int auto_increment,
@@ -14,18 +14,15 @@ create table user(
     dorm varchar(20) not null,
     email varchar(50) not null,
     key username (username),
-    primary key(uid)
+    primary key(uid) 
 ) Engine = InnoDB;
 
 create table items (
     iid int auto_increment,
     description varchar(100),
     price float not null,
-    availability enum('yes','no') not null,
-    urgency int,
-    check (urgency >=1 and urgency <= 10),
     category set('food','clothing','shoes','services','utility',
-    'makeup','bath/body','event','other') not null,
+    'makeup','bath-body','event','other') not null,
 	other varchar(30),
 	photo blob,
     role enum('buyer', 'seller') not null,

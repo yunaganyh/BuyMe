@@ -8,7 +8,7 @@ import MySQLdb
 # return the connection to MySQLdb 
 def getConn(db):
     conn = MySQLdb.connect(host='localhost',
-                           user='kealani',
+                           user='ubuntu',
                            passwd='',
                            db=db)
     conn.autocommit(True)
@@ -61,8 +61,10 @@ def getUserPassword(conn, username):
 #insert item into items table
 def insertNewItem(conn, item):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''insert into items (description, price, availability,urgency, category, other, role) values 
-                    (%s, %s,%s,%s,%s,%s,%s)''', [item['description'], item['price'],item['available'],item['urgency'], item['category'],item['other'],item['role']])
+    curs.execute('''insert into items (description, price,category, other, role) values 
+                    (%s,%s,%s,%s,%s)''', 
+                    [item['description'], item['price'], item['category'],
+                    item['other'],item['role']])
 
 def insertNewPost(conn,userDict,iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
@@ -102,17 +104,6 @@ def updatePostDescription(conn, description,iid):
 def updatePostPrice(conn, price, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''update items set price = %s where iid=%s''',[price, iid])
-
-#update posts with new availability
-def updatePostAvailability(conn, availability, iid):
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''update items set availability = %s where iid=%s''',[availability, iid])
-
-#update posts with new urgency
-def updatePostUrgency(conn, urgency, iid):
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''update items set urgency = %s where iid=%s''',[urgency, iid])
-    
 #update posts with new category
 def updatePostCategory(conn, category, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)

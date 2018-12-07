@@ -19,7 +19,6 @@ app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
 def home():
     conn = sqlFunctions.getConn('c9')
     posts = sqlFunctions.getItemsAndUsers(conn)
-    # print posts
     return render_template('main.html', posts = posts)
 
 #register user and add them into the user database
@@ -162,14 +161,11 @@ def uploadPost():
         try:
             description = request.form.get('description')
             price = request.form.get('price')
-            available = request.form.get('avail')
-            urgency = request.form.get('urgency')
             category = request.form.get('category')
             other = request.form.get('other')
             role = request.form.get('role')
             itemDict = {'description': description, 'price': price,
-            'available': available, 'urgency': urgency, 'category': category, 'other': other, 'role': role}
-            sqlFunctions.insertNewItem(conn, itemDict) #add item to the database
+            'category': category, 'other': other, 'role': role}
             
             # below is to assign an item to a specific user
             # status = ('username' in session)
@@ -177,6 +173,7 @@ def uploadPost():
             if 'username' in session:
                 username = session['username']
                 uid = sqlFunctions.getUserByUsername(conn,username)
+                sqlFunctions.insertNewItem(conn, itemDict) #add item to the database
                 iid = sqlFunctions.getLatestItem(conn)
                 print uid
                 print iid
@@ -203,12 +200,8 @@ def updatePost():
             sqlFunctions.updatePostDescription(conn, request.form['description'],iid)
         if 'price' in request.form:
             sqlFunctions.updatePostPrice(conn, request.form['price'],iid)
-        if 'avail' in request.form:
-            sqlFunctions.updatePostAvailability(conn, request.form['availability'], iid)
-        if 'urgency' in request.form:
-            sqlFunctions.updatePostUrgency(conn, request.form['urgency'], iid)
         if 'category' in request.form:
-            sqlFunctions.updatePostCategory(conn, request.form['category'].replace('-','/'), iid)
+            sqlFunctions.updatePostCategory(conn, request.form['category'], iid)
         if 'other' in request.form:
             sqlFunctions.updatePostOther(conn, request.form['other'], iid)
         return jsonify(sqlFunctions.getItemByID(conn,iid))
@@ -220,11 +213,13 @@ def updatePost():
 def deletePost():  
     conn = sqlFunctions.getConn('c9')
     sqlFunctions.deletePost(conn, request.form['iid'])
+    return jsonify(request.form['iid'])
 
-# @app.route('/checkUser/')
-# def checkUser():
-    
+@app.route('/messageUser/',methods=['POST'])
+def messageUser():
+    conn = sqlFunctions.getConn('c9')
+    return 1
 
 if __name__ == '__main__':
     app.debug = True
-    app.run('0.0.0.0',8081)
+    app.run('0.0.0.0',8080)
