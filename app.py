@@ -57,6 +57,7 @@ def register():
             session['username'] = username
             session['logged_in'] = True
             session['visits'] = 1
+            session.permanent= True
             return redirect( url_for('account',usernameInput=username) )
         except Exception as err:
             flash('form submission error '+str(err))
@@ -220,6 +221,38 @@ def messageUser():
     conn = sqlFunctions.getConn('c9')
     return 1
 
+@app.route('/sale/',methods=['GET','POST'])
+def search():
+    if request.method=="GET":
+        return render_template('forsale.html')
+    else:
+        category=request.form.get('menu-category')
+        print category
+        return redirect(url_for('searchCategory',category=category))
+
+@app.route('/sale/<category>', methods=['GET','POST'])
+def searchCategory(category):
+    conn = sqlFunctions.getConn('c9')
+    if request.method=="GET":
+        cat=sqlFunctions.getItembyCategory(conn,category)
+        if cat:
+            return render_template('search.html',cat=cat,category=category)
+        else:
+            flash("There are no posts in this category")
+            return redirect(request.referrer)
+    
+@app.route('/stringSearch/', methods=['POST'])
+def stringSearch():
+    conn=sqlFunctions.getConn('c9')
+    if request.method=="POST":
+        searchWord = request.form.get('searchterm')
+        # print searchWord
+        keyword=sqlFunctions.partialDescription(conn,searchWord)
+        if not keyword:
+            flash("There is no post that matches this keyword.")
+            return redirect(request.referrer)
+        else:
+            return render_template("search.html", cat=keyword)
 if __name__ == '__main__':
     app.debug = True
     app.run('0.0.0.0',8080)

@@ -76,7 +76,7 @@ def insertNewPost(conn,userDict,iid):
 #retrieve items based on whether role is seller or buyer
 def getItemsForSale(conn, role):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select items.*,posts.* from items inner join posts on items.iid=posts.iid where items.role=%s''',[role])
+    curs.execute('''select items.*, posts.*,user.name,user.dorm from items inner join posts on items.iid=posts.iid inner join user on user.uid=posts.uid where items.role=%s''',[role])
     return curs.fetchall()
 
 #get item by ID:
@@ -118,3 +118,15 @@ def updatePostOther(conn, other, iid):
 def updatePostPhoto(conn, photo, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''update items set photo = %s where iid=%s''',[photo,iid])
+    
+def getItembyCategory(conn,category):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from items where category=%s''',[category])
+    return curs.fetchall()
+    
+def partialDescription(conn,keyword):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor) # SQL query from wmdb, to get id's movies
+    word = "%" + keyword +"%"
+    curs.execute('''select * from items where description like %s''',[word])
+    results= curs.fetchall()
+    return results

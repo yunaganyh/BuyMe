@@ -19,7 +19,7 @@
     {% endwith %}
     {% endblock %} 
     </div>
-
+{% block buttons %}
 <form id="login" method="POST" action="{{url_for('login')}}">
         <input id="login_username" placeholder="username" name="login_username">
         <input id="login_password" placeholder="password" name="login_password">
@@ -42,8 +42,8 @@
 <form id="account" method="GET" action="{{url_for('uploadPost')}}">
         <button id="upload" type="submit" name="submit" value="upload"> Upload Item </button> 
 </form>
-
-<form id="search" method="POST" action="/search/">
+{% endblock %}
+<form id="search" method="POST" action="{{url_for('stringSearch')}}">
         <input id="searchterm" placeholder="Search for posts" name="searchterm">
         <button id="searchbutton" type="submit" name="submit" value="Search"> Search </button> 
 </form>
@@ -51,7 +51,9 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 <h1>Items for Sale</h1>
-    
+
+<div id="sposts">
+      
 <table id="posts-list">
     <tr>
         <th>Contact</th>
@@ -61,7 +63,6 @@
         <th>Photo</th>
         <th>Time Uploaded</th>
     </tr>
-
     {% for post in posts %}
         <tr class = "tt" data-tt="{post.iid}}">
             <td class="name"><a href="{{url_for('account',usernameInput=post.username)}}">{{post.name}}</td>
@@ -73,7 +74,7 @@
             </tr>
     {% endfor %}
     </table>
-
+    </div>
 <script>
 /*global $*/
 </script>
