@@ -9,7 +9,7 @@
                 <select required name="menu-category">
                     <option value="none">Choose One</option>
                     {% for category in ['food','clothing','shoes','services','utility',
-            'makeup','bath/body','event','other'] %}
+            'makeup','textbooks','bath-body','event','other'] %}
                         <option value={{category}}>{{category}}</option>
                     {% endfor %}
                 </select>
@@ -19,34 +19,23 @@
         
         <h1>Items for Sale</h1>
         <table>
-<<<<<<< HEAD
-            {% for item in salePosts%}
-            <tr id={{item.iid}}> 
-=======
             <tr>
             <th>Contact</th>
             <th>Description</th>
             <th>Category</th>
             <th>Price</th>
-            <th>Availability</th>
-            <th>Urgency</th>
-            <th>Check</th>
-            <th>Dorm</th>
+            <th>Other</th>
             <th>Photo</th>
             
             </tr>
             {% for item in saleposts%}
             <tr id=iid value={{item.iid}}>
                 <td>{{item.name}}</td>
->>>>>>> 528d6e4371db8c03d5244eef1fbfff18ddbef1dd
                 <td>{{item.description}}</td>
                 <td>{{item.category}}</td>
                 <td>{{item.price}}</td>
-                <td>{{item.availability}}</td>
-                <td>{{item.urgency}}</td>
-                <td>{{item.photo}}</td>
-                <td>{{item.dorm}}</td>
                 <td>{{item.other}}</td>
+                <td><img src="{{url_for('blob',iid=item.iid)}}"></td>
                 <td>
                <button id="userinfo" type="submit" name="submit" value="userinfo"> Send Message </button>  </td>
             </tr>
