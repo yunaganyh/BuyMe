@@ -96,18 +96,14 @@ def account(usernameInput):
             return redirect(url_for('account',usernameInput=username))
         if username == usernameInput:
             user = session['user']
-            availablePosts = sqlFunctions.getUserPosts(conn,user['uid'],'false')
-            soldPosts = sqlFunctions.getUserPosts(conn,user['uid'],'true')
-            itemsToBuyMessages = sqlFunctions.retrieveItemsToBuyMessageForUser(conn,user['uid'])
-            itemsToSellMessages = sqlFunctions.retrieveItemsToSellMessageForUser(conn,user['uid'])
             isUser = True
         elif username != usernameInput and usernameInput != '':
             user = sqlFunctions.getUserByUsername(conn, usernameInput)
-            availablePosts = sqlFunctions.getUserPosts(conn, user['uid'],'false')
-            soldPosts = sqlFunctions.getUserPosts(conn,user['uid'],'true')
-            itemsToBuyMessages = sqlFunctions.retrieveItemsToBuyMessageForUser(conn,user['uid'])
-            itemsToSellMessages = sqlFunctions.retrieveItemsToSellMessageForUser(conn,user['uid'])
             isUser = False
+        availablePosts = sqlFunctions.getUserPosts(conn, user['uid'],'false')
+        soldPosts = sqlFunctions.getUserPosts(conn,user['uid'],'true')
+        itemsToBuyMessages = sqlFunctions.retrieveItemsToBuyMessageForUser(conn,user['uid'])
+        itemsToSellMessages = sqlFunctions.retrieveItemsToSellMessageForUser(conn,user['uid'])
         return render_template('account.html', 
                                 person = user, availablePosts = availablePosts,
                                 soldPosts = soldPosts, itemsToBuyMessages = itemsToBuyMessages,
@@ -168,9 +164,12 @@ def logout():
 def getSalePosts():
     conn = sqlFunctions.getConn('c9')
     # retrieves the posts from the database
-    salePosts=sqlFunctions.getItemsForSale(conn, "seller")
-    print salePosts
-    return render_template('forsale.html', salePosts=salePosts)
+    saleposts=sqlFunctions.getItemsForSale(conn, "seller")
+    print saleposts
+    currentUser = ''
+    if 'username' in session:
+        currentUser = session['username']
+    return render_template('forsale.html', posts=saleposts, currentUser = currentUser)
 
 @app.route('/blob/<iid>')
 def blob(iid):
@@ -179,7 +178,7 @@ def blob(iid):
     numrows = curs.execute('''select iid,photo from items
                             where iid = %s''', [iid])
     if numrows == 0:
-        flash('No picture for {}'.format(iid))
+        flash('No picture for item {}'.format(iid))
         return redirect(url_for('home'))
     row = curs.fetchone()
     photo = row['photo']
@@ -195,12 +194,12 @@ def blobs():
     print len(pics), 'found'
     return render_template('main.html',pics=pics)
 
-''' 
+"""
 Handles the upload form submission
 Retrieves inputs from the form and creates a dictionary that will be passed into
 a function that extracts the different compenents to insert the item into the 
 Items table
-'''
+"""
 @app.route('/upload/', methods=['GET','POST'])
 def uploadPost():
     conn = sqlFunctions.getConn('c9')
@@ -237,15 +236,15 @@ def uploadPost():
                 sqlFunctions.insertNewItem(conn, itemDict) #add item to the database
                 iid = sqlFunctions.getLatestItem(conn)
                 iid = iid['last_insert_id()']
-                sqlFunctions.insertNewPost(conn,uid,iid)
+                sqlFunctions.insertNewPost(conn,uid,iid) #add uid and iid to post table
         except Exception as err:
             flash('form submission error '+str(err))
     return redirect(url_for('home'))
 
-''' 
+"""
 Retrieves a post from the form 
 and returns it in JSON format 
-'''
+"""
 @app.route('/retrievePost/', methods=['POST'])
 def retrievePost():
     conn = sqlFunctions.getConn('c9')
@@ -253,11 +252,11 @@ def retrievePost():
     item = sqlFunctions.getItemByID(conn, iid)
     return jsonify(item)
     
-'''
+"""
 Handles updating the post
 Takes inputs from the update posts form, updates the items,
 and returns the item JSON formatted
-'''
+"""
 @app.route('/updatePost/', methods=['POST'])
 def updatePost():
     conn = sqlFunctions.getConn('c9')
@@ -276,9 +275,9 @@ def updatePost():
         flash('Invalid item')
     return jsonify({})
  
-'''
+"""
 Deletes a post and returns
-'''
+"""
 @app.route('/deletePost/', methods=['POST'])
 def deletePost():  
     conn = sqlFunctions.getConn('c9')
@@ -321,7 +320,7 @@ def search():
         return render_template('forsale.html')
     else:
         category=request.form.get('menu-category')
-        print category
+        # print category
         return redirect(url_for('searchCategory',category=category))
 
 @app.route('/sale/<category>', methods=['GET','POST'])
