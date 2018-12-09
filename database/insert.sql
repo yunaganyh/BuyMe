@@ -1,16 +1,16 @@
 use c9;
 
-insert into items (description, price, availability, category, role) values 
-('Ugg boots',50,'yes','shoes','seller');
+insert into items (description, price, category, role) values 
+('Ugg boots',50,'shoes','seller');
 
-insert into items (description, price, availability, category, role) values 
-('Zara dress',35,'yes','clothing','seller');
+insert into items (description, price, category, role) values 
+('Zara dress',35,'clothing','seller');
 
-insert into items (description, price, availability, category, other, role) values 
-('Muji stationery',5,'yes','other','stationery','seller');
+insert into items (description, price, category, other, role) values 
+('Muji stationery',5,'other','stationery','seller');
 
-insert into items (description, price, availability, category, role) values 
-('Peach palette',29,'yes','makeup','seller');
+insert into items (description, price, category, role) values 
+('Peach palette',29,'makeup','seller');
 
 insert into user (name,username,gradYear,dorm,email) values ('Wendy Wellesley','wwellesley',2020,'McAfee Hall','wwelles@wellesley.edu');
 insert into user (name,username,gradYear,dorm,email) values ('Sally Stone','sstone',2021,'Freeman Hall','sstone@wellesley.edu');

@@ -64,7 +64,7 @@ def register():
     return redirect(request.referrer)
 
 #account page for user    
-@app.route('/account/', defaults={'usernameInput':''}, methods=['POST'])
+@app.route('/account/', defaults={'usernameInput':''}, methods=['POST','GET'])
 @app.route('/account/<usernameInput>', methods=['POST','GET'])
 def account(usernameInput):
     print request.method
@@ -78,7 +78,7 @@ def account(usernameInput):
     if loggedIn:
         username = session['username']
         #retrieve posts by user
-        if request.method == 'POST':
+        if usernameInput == '':
             return redirect(url_for('account',usernameInput=username))
         if username == usernameInput:
             user = sqlFunctions.getUserByUsername(conn,username)
@@ -143,7 +143,7 @@ def getSalePosts():
     conn = sqlFunctions.getConn('c9')
     # retrieves the posts from the database
     saleposts=sqlFunctions.getItemsForSale(conn, "seller")
-    print saleposts
+    # print saleposts
     return render_template('forsale.html', saleposts=saleposts)
 
 ''' 
@@ -176,8 +176,8 @@ def uploadPost():
                 uid = sqlFunctions.getUserByUsername(conn,username)
                 sqlFunctions.insertNewItem(conn, itemDict) #add item to the database
                 iid = sqlFunctions.getLatestItem(conn)
-                print uid
-                print iid
+                # print uid
+                # print iid
                 sqlFunctions.insertNewPost(conn,uid,iid) #add uid and iid to post table
         except Exception as err:
             flash('form submission error '+str(err))
@@ -227,7 +227,7 @@ def search():
         return render_template('forsale.html')
     else:
         category=request.form.get('menu-category')
-        print category
+        # print category
         return redirect(url_for('searchCategory',category=category))
 
 @app.route('/sale/<category>', methods=['GET','POST'])

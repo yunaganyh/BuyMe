@@ -1,12 +1,52 @@
 <!--Yuna Gan, Kealani Finegan, Breana Dupree-Jones-->
+
+{% block htmlTop %}
 <!doctype html>
-
 <html lang='en'>
-
-<title>BuyMe homepage</title>
+<head>
+    
+</head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 <link rel='stylesheet' href="{{url_for('static',filename='style.css')}}">
+{% endblock %}
 
 <body>
+    {% block css %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="">BuyMe</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarText">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="{{url_for('home')}}">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('account',usernameInput='')}}">Account</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('register')}}">Register</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('getSalePosts')}}">Items For Sale</a>
+      </li>
+      
+    </ul>
+    <span class="navbar-text">
+    <nav class="navbar navbar-light bg-light">
+       <form class="form-inline" id="login" method="POST" action="{{url_for('login')}}">
+            <input id="login_username" placeholder="username" name="login_username">
+            <input id="login_password" placeholder="password" name="login_password">
+            <button  class="btn btn-outline-success my-2 my-sm-0" id="loginbutton" type="submit" name="submit" value="login" aria-label="Login"> Log In </button> 
+    </form>
+    </nav>
+    </span> 
+    
+    </div>
+    </nav>
+    {% endblock %}
+    <title>BuyMe homepage</title>
      <div id="flashes">{% block flashes %}
    {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -20,13 +60,18 @@
     {% endblock %} 
     </div>
 {% block buttons %}
-<form id="login" method="POST" action="{{url_for('login')}}">
-        <input id="login_username" placeholder="username" name="login_username">
-        <input id="login_password" placeholder="password" name="login_password">
-        <button id="loginbutton" type="submit" name="submit" value="login"> Log In </button> 
-</form>
-<p>Logged in as: {{username}}</p>
+<!--<p>Logged in as: {{username}}</p>-->
 
+
+<span>
+<div class="btn-group justify-content-between">
+    
+    <form class="form-inline" id="search" method="POST" action="{{url_for('stringSearch')}}">
+            <input class="form-control mr-sm-2" id="searchterm" placeholder="Search 
+posts" name="searchterm" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" id="searchbutton"
+            type="submit" name="submit" value="Search"> Search </button> 
+    </form>
 <form id="logout" method="POST" action="{{url_for('logout')}}">
         <button id="logout" type="submit"> Log Out </button> 
 </form>
@@ -42,18 +87,16 @@
 <form id="account" method="GET" action="{{url_for('uploadPost')}}">
         <button id="upload" type="submit" name="submit" value="upload"> Upload Item </button> 
 </form>
+</div></span>
 {% endblock %}
-<form id="search" method="POST" action="{{url_for('stringSearch')}}">
-        <input id="searchterm" placeholder="Search for posts" name="searchterm">
-        <button id="searchbutton" type="submit" name="submit" value="Search"> Search </button> 
-</form>
 
+{% block content %}
+    {% endblock %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
+{% block sale %}
 <h1>Items for Sale</h1>
-
 <div id="sposts">
-      
 <table id="posts-list">
     <tr>
         <th>Contact</th>
@@ -75,6 +118,9 @@
     {% endfor %}
     </table>
     </div>
+    {% endblock %}
+    
+    
 <script>
 /*global $*/
 </script>

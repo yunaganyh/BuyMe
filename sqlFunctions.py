@@ -121,12 +121,12 @@ def updatePostPhoto(conn, photo, iid):
     
 def getItembyCategory(conn,category):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select * from items where category=%s''',[category])
+    curs.execute('''select items.*, posts.*,user.name,user.dorm from items inner join posts on items.iid=posts.iid inner join user on user.uid=posts.uid where category=%s''',[category])
     return curs.fetchall()
     
 def partialDescription(conn,keyword):
     curs = conn.cursor(MySQLdb.cursors.DictCursor) # SQL query from wmdb, to get id's movies
     word = "%" + keyword +"%"
-    curs.execute('''select * from items where description like %s''',[word])
+    curs.execute('''select items.*, posts.*,user.name,user.dorm from items inner join posts on items.iid=posts.iid inner join user on user.uid=posts.uid where description like %s''',[word])
     results= curs.fetchall()
     return results
