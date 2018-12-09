@@ -15,17 +15,23 @@ def getConn(db):
     return conn
 
 #joins the items and users tables based on uid    
-def getItemsAndUsers(conn):
+def getAvailableItemsAndUsers(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select * from items inner join posts on items.iid=posts.iid 
-    inner join user on user.uid=posts.uid''')
+    curs.execute('''select user.uid, user.username, user.name, items.iid, items.description, 
+                    items.price, items.category, items.photo, items.other
+                    from items inner join posts on items.iid=posts.iid 
+                    inner join user on user.uid=posts.uid 
+                    where posts.sold = true 
+                    order by items.uploaded desc''')
     return curs.fetchall()
 
 #get items for a specific user based on user uid
-def getUserPosts(conn,user):
+def getUserPosts(conn,uid, sold):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select * from items inner join posts on items.iid=posts.iid 
-    where posts.uid=%s''',[user['uid']])
+    curs.execute('''select items.description, items.price, items.category,
+                    items.other, items.photo, items.iid 
+                    from items inner join posts on items.iid=posts.iid 
+                    where (posts.uid=%s and posts.sold=%s)''',[uid, sold])
     return curs.fetchall()
 
 #get user info from user table based on user uid    
@@ -90,6 +96,10 @@ def getLatestItem(conn):
     curs.execute('''select max(iid) from items''')
     return curs.fetchone()
     
+def deleteItem(conn, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''delete from items where iid=%s''',[iid])
+    
 #delete post from posts table
 def deletePost(conn, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
@@ -118,3 +128,53 @@ def updatePostOther(conn, other, iid):
 def updatePostPhoto(conn, photo, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''update items set photo = %s where iid=%s''',[photo,iid])
+    
+#insert message into message table
+def insertMessage(conn, sender, receiver, iid, message):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''insert into messages(sender,receiver, iid, message) 
+                values (%s,%s,%s, %s)''',
+                [sender,receiver, iid,message])
+    curs.execute('''select distinct last_insert_id() from messages''')
+    return curs.fetchone()
+
+def retrieveItemsToSellMessageForUser(conn,uid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select distinct receiver, sender, iid from messages where receiver = %s''',[uid])
+    distinctMessages = curs.fetchall()
+    print distinctMessages
+    for i in distinctMessages:
+        curs.execute('''select distinct items.description from items inner join messages 
+                        where (items.iid = messages.iid and items.iid = %s)''',
+                        [i['iid']])
+        i['description'] = curs.fetchone()['description']
+        sender = getUser(conn, i['sender'])
+        i['name'] = sender['name']
+        i['username'] = sender['username']
+    print 'MESSAGES RECEIVED'
+    print distinctMessages
+    return distinctMessages
+    
+def retrieveItemsToBuyMessageForUser(conn,uid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select distinct receiver, sender, iid from messages where sender = %s''',[uid])
+    distinctMessages = curs.fetchall()
+    print distinctMessages
+    for i in distinctMessages:
+        curs.execute('''select distinct items.description from items inner join messages 
+                        where (items.iid = messages.iid and items.iid = %s)''',
+                        [i['iid']])
+        i['description'] = curs.fetchone()['description']
+        receiver = getUser(conn, i['receiver'])
+        i['name'] = receiver['name']
+        i['username'] = receiver['username']
+    print 'MESSAGES SENT'
+    print distinctMessages
+    return distinctMessages
+    
+def markPostSold(conn, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''update posts set sold = 'true' where iid = %s''',[iid])
+    
+def getMessageInfo(conn, uid, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)

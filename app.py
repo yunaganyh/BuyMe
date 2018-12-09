@@ -5,8 +5,6 @@ import sys,os
 from werkzeug import secure_filename
 import bcrypt
 import sqlFunctions
-import time
-from datetime import datetime, timedelta
 app = Flask(__name__)
 
 app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
@@ -18,8 +16,11 @@ app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
 @app.route('/', methods=['GET','POST'])
 def home():
     conn = sqlFunctions.getConn('c9')
-    posts = sqlFunctions.getItemsAndUsers(conn)
-    return render_template('main.html', posts = posts)
+    posts = sqlFunctions.getAvailableItemsAndUsers(conn)
+    currentUser = ''
+    if 'username' in session:
+        currentUser = session['username']
+    return render_template('main.html', posts = posts, currentUser = currentUser)
 
 #register user and add them into the user database
 @app.route('/register/', methods=['GET','POST'])
@@ -53,17 +54,20 @@ def register():
             #insert user into user table and password table
             sqlFunctions.insertUser(conn,username,name,gradYear,dorm,email)
             sqlFunctions.insertUserpass(conn,username,hashed)
+            user = sqlFunctions.getUserByUsername(conn, username)
             #create session for user
             session['username'] = username
+            session['user'] = user
             session['logged_in'] = True
             session['visits'] = 1
+            session.permanent = True
             return redirect( url_for('account',usernameInput=username) )
         except Exception as err:
             flash('form submission error '+str(err))
     return redirect(request.referrer)
 
 #account page for user    
-@app.route('/account/', defaults={'usernameInput':''}, methods=['POST'])
+@app.route('/account/', defaults={'usernameInput':''}, methods=['POST','GET'])
 @app.route('/account/<usernameInput>', methods=['POST','GET'])
 def account(usernameInput):
     print request.method
@@ -77,17 +81,27 @@ def account(usernameInput):
     if loggedIn:
         username = session['username']
         #retrieve posts by user
-        if request.method == 'POST':
+        if usernameInput == '':
             return redirect(url_for('account',usernameInput=username))
         if username == usernameInput:
-            user = sqlFunctions.getUserByUsername(conn,username)
-            posts = sqlFunctions.getUserPosts(conn,user)
+            user = session['user']
+            availablePosts = sqlFunctions.getUserPosts(conn,user['uid'],'false')
+            soldPosts = sqlFunctions.getUserPosts(conn,user['uid'],'true')
+            itemsToBuyMessages = sqlFunctions.retrieveItemsToBuyMessageForUser(conn,user['uid'])
+            itemsToSellMessages = sqlFunctions.retrieveItemsToSellMessageForUser(conn,user['uid'])
             isUser = True
         elif username != usernameInput and usernameInput != '':
             user = sqlFunctions.getUserByUsername(conn, usernameInput)
-            posts = sqlFunctions.getUserPosts(conn, user)
+            availablePosts = sqlFunctions.getUserPosts(conn, user['uid'],'false')
+            soldPosts = sqlFunctions.getUserPosts(conn,user['uid'],'true')
+            itemsToBuyMessages = sqlFunctions.retrieveItemsToBuyMessageForUser(conn,user['uid'])
+            itemsToSellMessages = sqlFunctions.retrieveItemsToSellMessageForUser(conn,user['uid'])
             isUser = False
-        return render_template('account.html', person = user, posts = posts, isUser = isUser)
+        return render_template('account.html', 
+                                person = user, availablePosts = availablePosts,
+                                soldPosts = soldPosts, itemsToBuyMessages = itemsToBuyMessages,
+                                itemsToSellMessages = itemsToSellMessages,
+                                isUser = isUser)
     else:
         flash('User not logged in')
         return redirect(url_for('home'))
@@ -108,6 +122,8 @@ def login():
         #compares the user's input to the hashed password
         if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
             flash('successfully logged in as '+username)
+            user = sqlFunctions.getUserByUsername(conn, username)
+            session['user'] = user
             session['username'] = username
             session['logged_in'] = True
             session['visits'] = 1
@@ -124,9 +140,9 @@ def login():
 def logout():
     try:
         if 'username' in session:
-            username = session['username']
             session.pop('username')
             session.pop('logged_in')
+            session.pop('user')
             flash('You are logged out')
             return redirect(request.referrer)
         else:
@@ -141,9 +157,9 @@ def logout():
 def getSalePosts():
     conn = sqlFunctions.getConn('c9')
     # retrieves the posts from the database
-    saleposts=sqlFunctions.getItemsForSale(conn, "seller")
-    print saleposts
-    return render_template('forsale.html', saleposts=saleposts)
+    salePosts=sqlFunctions.getItemsForSale(conn, "seller")
+    print salePosts
+    return render_template('forsale.html', salePosts=salePosts)
 
 ''' 
 Handles the upload form submission
@@ -170,9 +186,8 @@ def uploadPost():
             # below is to assign an item to a specific user
             # status = ('username' in session)
             # print status
-            if 'username' in session:
-                username = session['username']
-                uid = sqlFunctions.getUserByUsername(conn,username)
+            if 'user' in session:
+                uid = session['user']
                 sqlFunctions.insertNewItem(conn, itemDict) #add item to the database
                 iid = sqlFunctions.getLatestItem(conn)
                 print uid
@@ -180,8 +195,8 @@ def uploadPost():
                 sqlFunctions.insertNewPost(conn,uid,iid) #add uid and iid to post table
         except Exception as err:
             flash('form submission error '+str(err))
-    posts = sqlFunctions.getItemsAndUsers(conn) #return to main page and pass in updated item list
-    return render_template('main.html', posts = posts)
+    posts = sqlFunctions.getAvailableItemsAndUsers(conn) #return to main page and pass in updated item list
+    return redirect(url_for('home'))
 
 @app.route('/retrievePost/', methods=['POST'])
 def retrievePost():
@@ -212,13 +227,38 @@ def updatePost():
 @app.route('/deletePost/', methods=['POST'])
 def deletePost():  
     conn = sqlFunctions.getConn('c9')
-    sqlFunctions.deletePost(conn, request.form['iid'])
+    sqlFunctions.deleteItem(conn,request.form['iid'])
     return jsonify(request.form['iid'])
+
+@app.route('/markPostSold/', methods=['POST'])
+def markPostSold():
+    conn = sqlFunctions.getConn('c9')
+    sqlFunctions.markPostSold(conn,request.form['iid'])
+    return jsonify(request.form['iid'])
+    
 
 @app.route('/messageUser/',methods=['POST'])
 def messageUser():
     conn = sqlFunctions.getConn('c9')
-    return 1
+    print request.form
+    messageID = None
+    if 'user' in session:
+        user = session['user']
+        messageID = sqlFunctions.insertMessage(
+            conn,user['uid'],request.form['uid'],request.form['iid'],
+            request.form['description'])
+    return jsonify(messageID)
+    
+@app.route('/userAndItemInfo/',methods=['POST'])
+def getUserItemInfo():
+    conn = sqlFunctions.getConn('c9')
+    user = sqlFunctions.getUser(conn,request.form['uid'])
+    item = sqlFunctions.getItemByID(conn,request.form['iid'])
+    return jsonify({'user':user,'item':item})
+
+@app.route('/openConversation/', methods=['POST'])
+def openConversation():
+    conn = sqlFunctions.getConn('c9')
 
 if __name__ == '__main__':
     app.debug = True

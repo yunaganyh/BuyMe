@@ -11,6 +11,7 @@
 <form id="home" method="POST" action="{{url_for('home')}}">
         <button id="homebutton" type="submit" name="submit" value="home"> Go to home page </button> 
 </form>
+<h2>User Information</h2>
 <table id="user">
   <tr>
     <th>Username</th>
@@ -28,42 +29,107 @@
   </tr>
 </table>
 
-<table id="myPosts">
+<h2>Available Posts</h2>
+<table id="myAvailablePosts">
   <tr>
     <th>Description</th>
     <th>Price</th>
     <th>Category</th>
+    <th>Other</th>
     <th>Photo</th>
   </tr>
-  {% for post in posts %}
+  {% for post in availablePosts %}
   <tr class="post" data-iid="{{post.iid}}">
     <td class="description">{{post.description}}</td>
     <td class="price">{{post.price}}</td>
     <td class="category">{{post.category}}</td>
+    <td class="other">{{post.other}}</td>
     <td class="photo">{{post.photo}}</td>
     {% if isUser %}
-    <td><button id="update" name="update" type="submit">Update post</button></td>
+    <td><button class="update" name="update" type="submit">Update post</button></td>
     <td>
       <form method="post" action="{{url_for('updatePost')}}">
         </form>
     </td>
-    <td><button type="submit" id="delete">Delete post</button></td>
+    <td><button class="delete" name="delete" type="submit">Delete post</button></td>
     <td>
-      <form method="post" name="delete" action="{{url_for('deletePost')}}">
-        <input type="hidden" name="delete">
+      <form method="post" action="{{url_for('deletePost')}}">
         </form>
     </td>
-    {% endif %}
-    {% if not isUser %}
-    td>
-      <form method="post" name="message" action="{{url_for('messageUser')}}">
-        <input type="hidden" name="message">
+    <td><button class="markSold" name="markSold" type="submit">Mark as Sold</button></td>
+    <td>
+      <form method="post" action="{{url_for('markPostSold')}}">
         </form>
     </td>
     {% endif %}
   </tr>
   {% endfor %}
 </table>
+
+<h2>Sold Posts</h2>
+<table id="mySoldPosts">
+  <tr>
+    <th>Description</th>
+    <th>Price</th>
+    <th>Category</th>
+    <th>Other</th>
+    <th>Photo</th>
+  </tr>
+  {% for post in soldPosts %}
+  <tr class="post" data-iid="{{post.iid}}">
+    <td class="description">{{post.description}}</td>
+    <td class="price">{{post.price}}</td>
+    <td class="category">{{post.category}}</td>
+    <td class="other">{{post.other}}</td>
+    <td class="photo">{{post.photo}}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+
+{% if isUser %}
+<h2>My conversations</h2>
+
+<h3>Items I'm interested in</h3>
+<table id="itemsToBuyMessages">
+  <tr>
+    <th>Conversation with</th>
+    <th>Item</th>
+    <th>Message</th>
+  </tr>
+  {% for message in itemsToBuyMessages %}
+  <tr>
+    <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
+    <td class="item">{{message.description}}</td>
+    <td><button class="openConvo" name="openConvo" type="submit">Open conversation</button></td>
+    <td>
+      <form method="post" action="{{url_for('openConversation')}}">
+        </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h3>Items I'm selling</h3>
+<table id="itemsToSellMessages">
+  <tr>
+    <th>Conversation with</th>
+    <th>Item</th>
+    <th>Message</th>
+  </tr>
+  {% for message in itemsToSellMessages %}
+  <tr>
+    <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
+    <td class="item">{{message.description}}</td>
+    <td><button class="openConvo" name="openConvo" type="submit">Open conversation</button></td>
+    <td>
+      <form method="post" action="{{url_for('openConversation')}}">
+        </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
 
 
 <div id="updateDialog" title="Update Details For Item">
@@ -95,20 +161,24 @@
   /*global $*/
 
 
-$('#update').click(function(){
+$('#myAvailablePosts').on('click','.update',function(){
     var postID = $(this).closest('tr').data('iid');
     $.post("{{url_for('retrievePost')}}",{'iid':postID}, fillDialogForm);
     $("#updateDialog").dialog("open");
 })
 
-$('#delete').click(function(){
+$('#myAvailablePosts').on('click','.delete',function(){
     var postID = $(this).closest('tr').data('iid');
     $.post("{{url_for('deletePost')}}",{'iid':postID}, deletePostRow);
 })
 
+$('#myAvailablePosts').on('click','.markSold',function(){
+    var postID = $(this).closest('tr').data('iid');
+    $.post("{{url_for('markPostSold')}}",{'iid':postID}, markPostAsSold);
+})
+
 $('#updateButton').click(function(){
   var iid = $('#updateDialog').data('iid');
-  console.log(iid);
   var description = $('#description').val();
   var price = $('#price').val();
   var category = $("input[name=category]:checked").val();
@@ -118,6 +188,12 @@ $('#updateButton').click(function(){
             'otherDesc':otherDesc,'iid':iid}, 
             updatePostInfo);
 });
+
+function markPostAsSold(obj) {
+  var row =  $("[data-iid='" + obj + "']").closest("tr");
+  $('#mySoldPosts').append(row);
+  
+}
 
 function deletePostRow(obj) {
   $("[data-iid='" + obj + "']").closest("tr").remove();
@@ -129,7 +205,6 @@ function updatePostInfo(obj) {
   if (obj['description']) {
     post.find('.description').text(obj['description']);
   }
-  console.log(post.find('.description').text());
   if (obj['price']){
     post.find('.price').text(obj['price']);
   }

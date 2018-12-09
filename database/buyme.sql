@@ -33,6 +33,7 @@ create table items (
 create table posts (
      uid int not null,
      iid int not null,
+     sold enum('false','true') not null,
      key uid (uid),
      key iid (iid),
      primary key (uid,iid),
@@ -51,10 +52,12 @@ create table messages (
     messageId int auto_increment,
     sender int not null,
     receiver int not null,
+    iid int not null,
     message varchar(200) not null,
-    readMessage enum('true','false') not null,
+    readMessage enum('false','true') not null,
     messageSent timestamp DEFAULT CURRENT_TIMESTAMP,
-    primary key(messageId, sender, receiver),
+    primary key(messageId),
+    foreign key (iid) references items (iid) on delete cascade,
     foreign key (sender) references user (uid) on delete cascade,
     foreign key (receiver) references user (uid) on delete cascade
 )
