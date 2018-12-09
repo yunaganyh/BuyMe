@@ -67,22 +67,22 @@ def getUserPassword(conn, username):
 #insert item into items table
 def insertNewItem(conn, item):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''insert into items (description, price,category, other, role) values 
-                    (%s,%s,%s,%s,%s)''', 
+    # print item['photo']
+    curs.execute('''insert into items (description, price,category, other, photo, role) values 
+                    (%s,%s,%s,%s, %s,%s)''', 
                     [item['description'], item['price'], item['category'],
-                    item['other'],item['role']])
+                    item['other'], item['photo'], item['role']])
 
 def insertNewPost(conn,userDict,iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     uid = userDict['uid']
-    iid = iid['max(iid)']
     curs.execute('''insert into posts (uid,iid) values 
                     (%s,%s)''', [uid,iid])
     
 #retrieve items based on whether role is seller or buyer
 def getItemsForSale(conn, role):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select items.*,posts.* from items inner join posts on items.iid=posts.iid where items.role=%s''',[role])
+    curs.execute('''select items.*, posts.*,user.name,user.dorm from items inner join posts on items.iid=posts.iid inner join user on user.uid=posts.uid where items.role=%s''',[role])
     return curs.fetchall()
 
 #get item by ID:
@@ -93,7 +93,7 @@ def getItemByID(conn, iid):
 
 def getLatestItem(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select max(iid) from items''')
+    curs.execute('''select last_insert_id() from items''')
     return curs.fetchone()
     
 def deleteItem(conn, iid):
@@ -151,8 +151,6 @@ def retrieveItemsToSellMessageForUser(conn,uid):
         sender = getUser(conn, i['sender'])
         i['name'] = sender['name']
         i['username'] = sender['username']
-    print 'MESSAGES RECEIVED'
-    print distinctMessages
     return distinctMessages
     
 def retrieveItemsToBuyMessageForUser(conn,uid):
@@ -168,8 +166,6 @@ def retrieveItemsToBuyMessageForUser(conn,uid):
         receiver = getUser(conn, i['receiver'])
         i['name'] = receiver['name']
         i['username'] = receiver['username']
-    print 'MESSAGES SENT'
-    print distinctMessages
     return distinctMessages
     
 def markPostSold(conn, iid):
@@ -178,3 +174,16 @@ def markPostSold(conn, iid):
     
 def getMessageInfo(conn, uid, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
+
+def getItembyCategory(conn,category):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from items where category=%s''',[category])
+    return curs.fetchall()
+    
+def partialDescription(conn,keyword):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor) # SQL query from wmdb, to get id's movies
+    word = "%" + keyword +"%"
+    curs.execute('''select * from items where description like %s''',[word])
+    results= curs.fetchall()
+    return results
+

@@ -24,24 +24,46 @@
     
     <!-- Upload form that takes all the necessary information for a post 
     and sends it to the backend, items table -->
-    <form id="uploadform" action="{{url_for('uploadPost')}}" method="post">
+    <form id="uploadform" action="{{url_for('uploadPost')}}" method="post" enctype="multipart/form-data">
         <h2> Upload New Item </h2>
-        <p><label><b><em>Description </em></b><br><textarea rows="4" cols="50" maxlength="100" name="description"></textarea></label></p>
-        <p><label><b><em>Price $ </em></b><br><input type="text" name="price"></label></p>
-        <p><label><b><em>Category</em></b></label> <br>
-            <input type="radio" name="category" value="food"> food <br>
-            <input type="radio" name="category" value="clothing"> clothing <br>
-            <input type="radio" name="category" value="shoes"> shoes <br>
-            <input type="radio" name="category" value="services"> services <br>
-            <input type="radio" name="category" value="utility"> utility <br>
-            <input type="radio" name="category" value="makeup"> makeup <br>
-            <input type="radio" name="category" value="bath-body"> bath-body <br>
-            <input type="radio" name="category" value="event"> event <br>
-            <input type="radio" name="category" value="other">other <input type="text" name="other" value=""><br></p>
-        <p><label><b><em>Role </em></b><br><select name="role">
+        <p><label>Description <br><textarea rows="4" cols="50" maxlength="100" name="description"></textarea></label></p>
+        <p><label>Price $ <br><input type="text" name="price"></label></p>
+        <p><label>Category</label> <br>
+            <label for="food">Food</label>
+            <input type="radio" name="category" value="food"><br>
+            
+            <label for="clothing">Clothing</label>
+            <input type="radio" name="category" value="clothing"><br>
+            
+            <label for="shoes">Shoes</label>
+            <input type="radio" name="category" value="shoes"><br>
+            
+            <label for="services">Services</label>
+            <input type="radio" name="category" value="services"><br>
+            
+            <label for="utility">Utility</label>
+            <input type="radio" name="category" value="utility"><br>
+            
+            <label for="makeup">Makeup</label>
+            <input type="radio" name="category" value="makeup"><br>
+            
+            <label for="textbooks">Textbooks</label>
+            <input type="radio" name="category" value="textbooks"><br>
+            
+            <label for="bath-body">Bath-Body</label>
+            <input type="radio" name="category" value="bath-body"><br>
+            
+            <label for="event">Event</label>
+            <input type="radio" name="category" value="event"><br>
+            
+            <label for="other">Other</label>
+            <input type="radio" name="category" value="other"><input type="text" name="other" value=""><br></p>
+        
+        <p><label>Role <br><select name="role">
           <option value="seller">Seller</option>
           <option value="buyer">Buyer</option>
         </select></label></p>
+        <p><label for="pic">Photo: <br> <input type="file" name="pic"></label></p>
         <p><button type="submit">Submit</button></p>
     </form>
 

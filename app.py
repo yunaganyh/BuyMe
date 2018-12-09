@@ -1,16 +1,27 @@
-from flask import (Flask, url_for, render_template, request, session, redirect, flash, jsonify, send_from_directory)
+from flask import (Flask, url_for, render_template, request, session, redirect, 
+                   flash, jsonify, send_from_directory, make_response, Response)
 import random, math
 import MySQLdb
 import sys,os
 from werkzeug import secure_filename
 import bcrypt
 import sqlFunctions
+import imghdr
+import time
+from datetime import datetime, timedelta
 app = Flask(__name__)
 
 app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
                                           'abcdefghijklmnopqrstuvxyz' +
                                           '0123456789'))
                            for i in range(20) ])
+                           
+# This gets us better error messages for certain common request errors
+app.config['TRAP_BAD_REQUEST_ERRORS'] = True
+
+app.config['UPLOADS'] = 'uploads'
+app.config['MAX_UPLOAD'] = 1560000
+
                            
 #homepage that renders all posts     
 @app.route('/', methods=['GET','POST'])
@@ -60,7 +71,7 @@ def register():
             session['user'] = user
             session['logged_in'] = True
             session['visits'] = 1
-            session.permanent = True
+            session.permanent= True
             return redirect( url_for('account',usernameInput=username) )
         except Exception as err:
             flash('form submission error '+str(err))
@@ -161,6 +172,29 @@ def getSalePosts():
     print salePosts
     return render_template('forsale.html', salePosts=salePosts)
 
+@app.route('/blob/<iid>')
+def blob(iid):
+    conn = sqlFunctions.getConn('c9')
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    numrows = curs.execute('''select iid,photo from items
+                            where iid = %s''', [iid])
+    if numrows == 0:
+        flash('No picture for {}'.format(iid))
+        return redirect(url_for('home'))
+    row = curs.fetchone()
+    photo = row['photo']
+    print "photo info",len(photo),imghdr.what(None,photo)
+    return Response(photo, mimetype='photo/'+imghdr.what(None,photo))
+    
+@app.route('/blobs/')
+def blobs():
+    conn = sqlFunctions.getConn('c9')
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select iid,photo from items')
+    pics = curs.fetchall()
+    print len(pics), 'found'
+    return render_template('main.html',pics=pics)
+
 ''' 
 Handles the upload form submission
 Retrieves inputs from the form and creates a dictionary that will be passed into
@@ -180,8 +214,20 @@ def uploadPost():
             category = request.form.get('category')
             other = request.form.get('other')
             role = request.form.get('role')
+            
+            f = request.files['pic']
+            fsize = os.fstat(f.stream.fileno()).st_size
+            print 'file size is ',fsize
+            
+            if fsize > app.config['MAX_UPLOAD']:
+                raise Exception('File is too big')
+            mime_type = imghdr.what(f.stream)
+            if mime_type not in ['jpeg','gif','png']:
+                raise Exception('Not a JPEG, GIF or PNG: {}'.format(mime_type))
+            photo = f.read()
+            
             itemDict = {'description': description, 'price': price,
-            'category': category, 'other': other, 'role': role}
+            'category': category, 'other': other, 'photo': photo, 'role': role}
             
             # below is to assign an item to a specific user
             # status = ('username' in session)
@@ -190,12 +236,10 @@ def uploadPost():
                 uid = session['user']
                 sqlFunctions.insertNewItem(conn, itemDict) #add item to the database
                 iid = sqlFunctions.getLatestItem(conn)
-                print uid
-                print iid
-                sqlFunctions.insertNewPost(conn,uid,iid) #add uid and iid to post table
+                iid = iid['last_insert_id()']
+                sqlFunctions.insertNewPost(conn,uid,iid)
         except Exception as err:
             flash('form submission error '+str(err))
-    posts = sqlFunctions.getAvailableItemsAndUsers(conn) #return to main page and pass in updated item list
     return redirect(url_for('home'))
 
 @app.route('/retrievePost/', methods=['POST'])
@@ -260,6 +304,38 @@ def getUserItemInfo():
 def openConversation():
     conn = sqlFunctions.getConn('c9')
 
+@app.route('/sale/',methods=['GET','POST'])
+def search():
+    if request.method=="GET":
+        return render_template('forsale.html')
+    else:
+        category=request.form.get('menu-category')
+        print category
+        return redirect(url_for('searchCategory',category=category))
+
+@app.route('/sale/<category>', methods=['GET','POST'])
+def searchCategory(category):
+    conn = sqlFunctions.getConn('c9')
+    if request.method=="GET":
+        cat=sqlFunctions.getItembyCategory(conn,category)
+        if cat:
+            return render_template('search.html',cat=cat,category=category)
+        else:
+            flash("There are no posts in this category")
+            return redirect(request.referrer)
+    
+@app.route('/stringSearch/', methods=['POST'])
+def stringSearch():
+    conn=sqlFunctions.getConn('c9')
+    if request.method=="POST":
+        searchWord = request.form.get('searchterm')
+        # print searchWord
+        keyword=sqlFunctions.partialDescription(conn,searchWord)
+        if not keyword:
+            flash("There is no post that matches this keyword.")
+            return redirect(request.referrer)
+        else:
+            return render_template("search.html", cat=keyword)
 if __name__ == '__main__':
     app.debug = True
     app.run('0.0.0.0',8080)

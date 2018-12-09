@@ -7,88 +7,87 @@
 <link rel='stylesheet' href="{{url_for('static',filename='style.css')}}">
 
 <body>
-     <div id="flashes">{% block flashes %}
-   {% with messages = get_flashed_messages() %}
-    {% if messages %}
+    <div id="flashes">{% block flashes %} {% with messages = get_flashed_messages() %} {% if messages %}
         <div id="messages">
-        {% for msg in messages %}
+            {% for msg in messages %}
             <p>{{msg}}</p>
-        {% endfor %}
+            {% endfor %}
         </div>
-    {% endif %}
-    {% endwith %}
-    {% endblock %} 
+        {% endif %} {% endwith %} {% endblock %}
     </div>
-
-<form id="login" method="POST" action="{{url_for('login')}}">
+    {% block buttons %}
+    <form id="login" method="POST" action="{{url_for('login')}}">
         <input id="login_username" placeholder="username" name="login_username">
         <input id="login_password" placeholder="password" name="login_password">
-        <button id="loginbutton" type="submit" name="submit" value="login"> Log In </button> 
-</form>
-<p>Logged in as: {{username}}</p>
-
-<form id="logout" method="POST" action="{{url_for('logout')}}">
-        <button id="logout" type="submit"> Log Out </button> 
-</form>
-
-<form id="register" methods="POST" action="{{url_for('register')}}">
-        <button id="registerbutton" type="submit"> Register </button> 
-</form>
-
-<form id="account" method='POST' action="{{url_for('account')}}">
-        <button id="account" type="submit"> My Account </button> 
-</form>
-
-<form id="account" method="GET" action="{{url_for('uploadPost')}}">
-        <button id="upload" type="submit" name="submit" value="upload"> Upload Item </button> 
-</form>
-
-<form id="search" method="POST" action="/search/">
-        <input id="searchterm" placeholder="Search for posts" name="searchterm">
-        <button id="searchbutton" type="submit" name="submit" value="Search"> Search </button> 
-</form>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-<h1>Items for Sale</h1>
-    
-<table id="posts-list">
-    <tr>
-        <th>Contact</th>
-        <th>Description</th>
-        <th>Price</th>
-        <th>Category</th>
-        <th>Other</th>
-        <th>Photo</th>
-    </tr>
-
-    {% for post in posts %}
-        <tr id = "post" data-iid="{{post.iid}}" data-uid="{{post.uid}}">
-            <td class="name"><a href="{{url_for('account',usernameInput=post.username)}}">{{post.name}}</td>
-            <td class="description">{{post.description}}</td>
-            <td class="price">${{post.price}}</td>
-            <td class="category">{{post.category}}</td>
-            <td class="other">{{post.other}}</td>
-            <td class="photo">{{post.photo}}</td>
-            {% if currentUser != '' and currentUser != post.username %}
-            <td><button type="submit" class="messageUser">Message user</button></td>
-            <td><form method="post" name="message" action="{{url_for('messageUser')}}">
-                <input type="hidden" name="message"></form>
-            </td>
-            {% endif %}
-            </tr>
-    {% endfor %}
-    </table>
-    
-<div id="messageUserDialog" title="Message User">
-    <form id="messageToUser" method='POST'>
-        <input type="hidden" name="uid" id="uid" value="">
-        <input type="hidden" name="iid" id="iid" value="">
-        <p><label><textarea id="messageBody" rows="4" cols="50" maxlength="200" name="messageBody"></textarea></label></p>
-        <p><button type="submit" id="messageButton">Send Message</button></p>
+        <button id="loginbutton" type="submit" name="submit" value="login"> Log In </button>
     </form>
-</div>
+    <p>Logged in as: {{username}}</p>
 
+    <form id="logout" method="POST" action="{{url_for('logout')}}">
+        <button id="logout" type="submit"> Log Out </button>
+    </form>
+
+    <form id="register" methods="POST" action="{{url_for('register')}}">
+        <button id="registerbutton" type="submit"> Register </button>
+    </form>
+
+    <form id="account" method='POST' action="{{url_for('account')}}">
+        <button id="account" type="submit"> My Account </button>
+    </form>
+
+    <form id="account" method="GET" action="{{url_for('uploadPost')}}">
+        <button id="upload" type="submit" name="submit" value="upload"> Upload Item </button>
+    </form>
+    {% endblock %}
+    <form id="search" method="POST" action="{{url_for('stringSearch')}}">
+        <input id="searchterm" placeholder="Search for posts" name="searchterm">
+        <button id="searchbutton" type="submit" name="submit" value="Search"> Search </button>
+    </form>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <h1>Items for Sale</h1>
+
+    <div id="sposts">
+
+        <table id="posts-list">
+            <tr>
+                <th>Contact</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th>Ohter</th>
+                <th>Photo</th>
+            </tr>
+            {% for post in posts %}
+
+            <tr id = "post" data-iid="{{post.iid}}" data-uid="{{post.uid}}">
+                <td class="name"><a href="{{url_for('account',usernameInput=post.username)}}">{{post.name}}</td>
+                <td class="description">{{post.description}}</td>
+                <td class="price">${{post.price}}</td>
+                <td class="category">{{post.category}}</td>
+                <td class="other">{{post.other}}</td>
+                <td class="photo"><img src="{{url_for('blob',iid=post.iid)}}"></td>
+                {% if currentUser != '' and currentUser != post.username %}
+                <td><button type="submit" class="messageUser">Message user</button></td>
+                <td><form method="post" name="message" action="{{url_for('messageUser')}}">
+                    <input type="hidden" name="message"></form>
+                </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </table>
+    
+        <div id="messageUserDialog" title="Message User">
+            <form id="messageToUser" method='POST'>
+                <input type="hidden" name="uid" id="uid" value="">
+                <input type="hidden" name="iid" id="iid" value="">
+                <p><label><textarea id="messageBody" rows="4" cols="50" maxlength="200" name="messageBody"></textarea></label></p>
+                <p><button type="submit" id="messageButton">Send Message</button></p>
+            </form>
+        </div>
+    </div>
+    
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
