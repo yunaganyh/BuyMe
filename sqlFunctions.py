@@ -8,7 +8,7 @@ import MySQLdb
 # return the connection to MySQLdb 
 def getConn(db):
     conn = MySQLdb.connect(host='localhost',
-                           user='ubuntu',
+                           user='kealani',
                            passwd='',
                            db=db)
     conn.autocommit(True)
@@ -61,15 +61,15 @@ def getUserPassword(conn, username):
 #insert item into items table
 def insertNewItem(conn, item):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''insert into items (description, price,category, other, role) values 
-                    (%s,%s,%s,%s,%s)''', 
+    # print item['photo']
+    curs.execute('''insert into items (description, price,category, other, photo, role) values 
+                    (%s,%s,%s,%s, %s,%s)''', 
                     [item['description'], item['price'], item['category'],
-                    item['other'],item['role']])
+                    item['other'], item['photo'], item['role']])
 
 def insertNewPost(conn,userDict,iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     uid = userDict['uid']
-    iid = iid['max(iid)']
     curs.execute('''insert into posts (uid,iid) values 
                     (%s,%s)''', [uid,iid])
     
@@ -87,8 +87,9 @@ def getItemByID(conn, iid):
 
 def getLatestItem(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select max(iid) from items''')
+    curs.execute('''select last_insert_id() from items''')
     return curs.fetchone()
+    
     
 #delete post from posts table
 def deletePost(conn, iid):
