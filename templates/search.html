@@ -8,8 +8,8 @@
             <th>Description</th>
             <th>Category</th>
             <th>Price</th>
-            <th>Dorm</th>
             <th>Photo</th>
+            <th>Other</th>
             </tr>
            {% for item in cat %}
            <tr id=iid value={{item.iid}}>
@@ -17,8 +17,7 @@
                 <td>{{item.description}}</td>
                 <td>{{item.category}}</td>
                 <td>{{item.price}}</td>
-                <td>{{item.photo}}</td>
-                <td>{{item.dorm}}</td>
+                <td><img src="{{url_for('blob',iid=item.iid)}}"></td>
                 <td>{{item.other}}</td>
                 <td>
                <button id="userinfo" type="submit" name="submit" value="userinfo"> Send Message </button>  </td>

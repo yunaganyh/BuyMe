@@ -20,7 +20,7 @@ app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 
 app.config['UPLOADS'] = 'uploads'
-app.config['MAX_UPLOAD'] = 1560000
+app.config['MAX_UPLOAD'] = 260000
 
                            
 #homepage that renders all posts     
@@ -224,6 +224,10 @@ def uploadPost():
             flash('form submission error '+str(err))
     return redirect(url_for('home'))
 
+''' 
+Retrieves a post from the form 
+and returns it in JSON format 
+'''
 @app.route('/retrievePost/', methods=['POST'])
 def retrievePost():
     conn = sqlFunctions.getConn('c9')
@@ -231,7 +235,11 @@ def retrievePost():
     item = sqlFunctions.getItemByID(conn, iid)
     return jsonify(item)
     
-#to be fleshed out
+'''
+Handles updating the post
+Takes inputs from the update posts form, updates the items,
+and returns the item JSON formatted
+'''
 @app.route('/updatePost/', methods=['POST'])
 def updatePost():
     conn = sqlFunctions.getConn('c9')
@@ -249,7 +257,10 @@ def updatePost():
     except:
         flash('Invalid item')
     return jsonify({})
-  
+ 
+'''
+Deletes a post and returns
+'''
 @app.route('/deletePost/', methods=['POST'])
 def deletePost():  
     conn = sqlFunctions.getConn('c9')
