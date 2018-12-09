@@ -11,6 +11,7 @@
 {% endblock %}
 
 <body>
+<<<<<<< HEAD
     {% block css %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" href="">BuyMe</a>
@@ -51,13 +52,11 @@
    {% with messages = get_flashed_messages() %}
     {% if messages %}
         <div id="messages">
-        {% for msg in messages %}
+            {% for msg in messages %}
             <p>{{msg}}</p>
-        {% endfor %}
+            {% endfor %}
         </div>
-    {% endif %}
-    {% endwith %}
-    {% endblock %} 
+        {% endif %} {% endwith %} {% endblock %}
     </div>
 {% block buttons %}
 <!--<p>Logged in as: {{username}}</p>-->
@@ -76,14 +75,25 @@ posts" name="searchterm" aria-label="Search">
         <button id="logout" type="submit"> Log Out </button> 
 </form>
 
-<form id="register" methods="POST" action="{{url_for('register')}}">
-        <button id="registerbutton" type="submit"> Register </button> 
-</form>
+    {% block buttons %}
+    <form id="login" method="POST" action="{{url_for('login')}}">
+        <input id="login_username" placeholder="username" name="login_username">
+        <input id="login_password" placeholder="password" name="login_password">
+        <button id="loginbutton" type="submit" name="submit" value="login"> Log In </button>
+    </form>
+    <p>Logged in as: {{username}}</p>
 
-<form id="account" method='POST' action="{{url_for('account')}}">
-        <button id="account" type="submit"> My Account </button> 
-</form>
+    <form id="logout" method="POST" action="{{url_for('logout')}}">
+        <button id="logout" type="submit"> Log Out </button>
+    </form>
 
+    <form id="register" methods="POST" action="{{url_for('register')}}">
+        <button id="registerbutton" type="submit"> Register </button>
+    </form>
+
+    <form id="account" method='POST' action="{{url_for('account')}}">
+        <button id="account" type="submit"> My Account </button>
+    </form>
 <form id="account" method="GET" action="{{url_for('uploadPost')}}">
         <button id="upload" type="submit" name="submit" value="upload"> Upload Item </button> 
 </form>
@@ -92,30 +102,35 @@ posts" name="searchterm" aria-label="Search">
 
 {% block content %}
     {% endblock %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 {% block sale %}
-<h1>Items for Sale</h1>
-<div id="sposts">
-<table id="posts-list">
-    <tr>
-        <th>Contact</th>
-        <th>Description</th>
-        <th>Price</th>
-        <th>Category</th>
-        <th>Photo</th>
-        <th>Time Uploaded</th>
-    </tr>
-    {% for post in posts %}
-        <tr class = "tt" data-tt="{post.iid}}">
-            <td class="name"><a href="{{url_for('account',usernameInput=post.username)}}">{{post.name}}</td>
-            <td class="description">{{post.description}}</td>
-            <td class="price">${{post.price}}</td>
-            <td class="category">{{post.category}}</td>
-            <td class="photo">{{post.photo}}</td>
-            <td class="time">{{post.uploaded}}</td>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <h1>Items for Sale</h1>
+
+    <div id="sposts">
+
+        <table id="posts-list">
+            <tr>
+                <th>Contact</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th>Photo</th>
+                <th>Time Uploaded</th>
+            </tr>
+            {% for post in posts %}
+
+            <tr class="tt" data-tt="{post.iid}}">
+                <td class="name"><a href="{{url_for('account',usernameInput=post.username)}}">{{post.name}}</td>
+                <td class="description">{{post.description}}</td>
+                <td class="price">${{post.price}}</td>
+                <td class="category">{{post.category}}</td>
+                <td class="photo"><img src="{{url_for('blob',iid=post.iid)}}"></td>
+                <td class="time">{{post.uploaded}}</td>
             </tr>
     {% endfor %}
+    
     </table>
     </div>
     {% endblock %}

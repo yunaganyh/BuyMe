@@ -1,10 +1,12 @@
-from flask import (Flask, url_for, render_template, request, session, redirect, flash, jsonify, send_from_directory)
+from flask import (Flask, url_for, render_template, request, session, redirect, 
+                   flash, jsonify, send_from_directory, make_response, Response)
 import random, math
 import MySQLdb
 import sys,os
 from werkzeug import secure_filename
 import bcrypt
 import sqlFunctions
+import imghdr
 import time
 from datetime import datetime, timedelta
 app = Flask(__name__)
@@ -13,6 +15,13 @@ app.secret_key = ''.join([ random.choice(('ABCDEFGHIJKLMNOPQRSTUVXYZ' +
                                           'abcdefghijklmnopqrstuvxyz' +
                                           '0123456789'))
                            for i in range(20) ])
+                           
+# This gets us better error messages for certain common request errors
+app.config['TRAP_BAD_REQUEST_ERRORS'] = True
+
+app.config['UPLOADS'] = 'uploads'
+app.config['MAX_UPLOAD'] = 260000
+
                            
 #homepage that renders all posts     
 @app.route('/', methods=['GET','POST'])
@@ -146,6 +155,29 @@ def getSalePosts():
     # print saleposts
     return render_template('forsale.html', saleposts=saleposts)
 
+@app.route('/blob/<iid>')
+def blob(iid):
+    conn = sqlFunctions.getConn('c9')
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    numrows = curs.execute('''select iid,photo from items
+                            where iid = %s''', [iid])
+    if numrows == 0:
+        flash('No picture for {}'.format(iid))
+        return redirect(url_for('home'))
+    row = curs.fetchone()
+    photo = row['photo']
+    print "photo info",len(photo),imghdr.what(None,photo)
+    return Response(photo, mimetype='photo/'+imghdr.what(None,photo))
+    
+@app.route('/blobs/')
+def blobs():
+    conn = sqlFunctions.getConn('c9')
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select iid,photo from items')
+    pics = curs.fetchall()
+    print len(pics), 'found'
+    return render_template('main.html',pics=pics)
+
 ''' 
 Handles the upload form submission
 Retrieves inputs from the form and creates a dictionary that will be passed into
@@ -165,25 +197,43 @@ def uploadPost():
             category = request.form.get('category')
             other = request.form.get('other')
             role = request.form.get('role')
+            
+            f = request.files['pic']
+            fsize = os.fstat(f.stream.fileno()).st_size
+            print 'file size is ',fsize
+            
+            if fsize > app.config['MAX_UPLOAD']:
+                raise Exception('File is too big')
+            mime_type = imghdr.what(f.stream)
+            if mime_type not in ['jpeg','gif','png']:
+                raise Exception('Not a JPEG, GIF or PNG: {}'.format(mime_type))
+            photo = f.read()
+            
             itemDict = {'description': description, 'price': price,
-            'category': category, 'other': other, 'role': role}
+            'category': category, 'other': other, 'photo': photo, 'role': role}
             
             # below is to assign an item to a specific user
-            # status = ('username' in session)
-            # print status
             if 'username' in session:
                 username = session['username']
                 uid = sqlFunctions.getUserByUsername(conn,username)
-                sqlFunctions.insertNewItem(conn, itemDict) #add item to the database
+                sqlFunctions.insertNewItem(conn, itemDict)
                 iid = sqlFunctions.getLatestItem(conn)
+<<<<<<< HEAD
                 # print uid
                 # print iid
                 sqlFunctions.insertNewPost(conn,uid,iid) #add uid and iid to post table
+=======
+                iid = iid['last_insert_id()']
+                sqlFunctions.insertNewPost(conn,uid,iid)
+>>>>>>> 8ccafe675f2521c58189b97d227f0b4b9b454992
         except Exception as err:
             flash('form submission error '+str(err))
-    posts = sqlFunctions.getItemsAndUsers(conn) #return to main page and pass in updated item list
-    return render_template('main.html', posts = posts)
+    return redirect(url_for('home'))
 
+''' 
+Retrieves a post from the form 
+and returns it in JSON format 
+'''
 @app.route('/retrievePost/', methods=['POST'])
 def retrievePost():
     conn = sqlFunctions.getConn('c9')
@@ -191,7 +241,11 @@ def retrievePost():
     item = sqlFunctions.getItemByID(conn, iid)
     return jsonify(item)
     
-#to be fleshed out
+'''
+Handles updating the post
+Takes inputs from the update posts form, updates the items,
+and returns the item JSON formatted
+'''
 @app.route('/updatePost/', methods=['POST'])
 def updatePost():
     conn = sqlFunctions.getConn('c9')
@@ -209,7 +263,10 @@ def updatePost():
     except:
         flash('Invalid item')
     return jsonify({})
-  
+ 
+'''
+Deletes a post and returns
+'''
 @app.route('/deletePost/', methods=['POST'])
 def deletePost():  
     conn = sqlFunctions.getConn('c9')

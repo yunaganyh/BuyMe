@@ -22,7 +22,7 @@ create table items (
     description varchar(100),
     price float not null,
     category set('food','clothing','shoes','services','utility',
-    'makeup','bath-body','event','other') not null,
+    'makeup','textbooks','bath-body','event','other') not null,
 	other varchar(30),
 	photo blob,
     role enum('buyer', 'seller') not null,

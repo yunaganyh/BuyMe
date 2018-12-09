@@ -40,7 +40,7 @@
     <td class="description">{{post.description}}</td>
     <td class="price">{{post.price}}</td>
     <td class="category">{{post.category}}</td>
-    <td class="photo">{{post.photo}}</td>
+    <td class="photo"><img src="{{url_for('blob',iid=post.iid)}}"></td>
     {% if isUser %}
     <td><button id="update" name="update" type="submit">Update post</button></td>
     <td>
@@ -70,18 +70,38 @@
   <form id="updateForm" method='POST'>
         <h2 id="itemTitle"> Update Item </h2>
         <input type="hidden" name="iid" id="iid" value="">
-        <p><label><b><em>Description </em></b><br><textarea id="description" rows="4" cols="50" maxlength="100" name="description"></textarea></label></p>
-        <p><label><b><em>Price $ </em></b><br><input id="price" type="text" name="price"></label></p>
-        <p><label><b><em>Category</em></b></label> <br>
-            <input type="radio" name="category" value="food" id="food"> food <br>
-            <input type="radio" name="category" value="clothing" id="clothing"> clothing <br>
-            <input type="radio" name="category" value="shoes" id="shoes"> shoes <br>
-            <input type="radio" name="category" value="services" id="services"> services <br>
-            <input type="radio" name="category" value="utility" id="utility"> utility <br>
-            <input type="radio" name="category" value="makeup" id="makeup"> makeup <br>
-            <input type="radio" name="category" value="bath-body" id="bath-body"> bath-body <br>
-            <input type="radio" name="category" value="event" id="event"> event <br>
-            <input type="radio" name="category" value="other" id="other">other 
+        <p><label>Description <br><textarea id="description" rows="4" cols="50" maxlength="100" name="description"></textarea></label></p>
+        <p><label>Price $ <br><input id="price" type="text" name="price"></label></p>
+        <p><label>Category</label> <br>
+             <label for="food">Food</label>
+            <input type="radio" name="category" value="food"><br>
+            
+            <label for="clothing">Clothing</label>
+            <input type="radio" name="category" value="clothing"><br>
+            
+            <label for="shoes">Shoes</label>
+            <input type="radio" name="category" value="shoes"><br>
+            
+            <label for="services">Services</label>
+            <input type="radio" name="category" value="services"><br>
+            
+            <label for="utility">Utility</label>
+            <input type="radio" name="category" value="utility"><br>
+            
+            <label for="makeup">Makeup</label>
+            <input type="radio" name="category" value="makeup"><br>
+            
+            <label for="textbooks">Textbooks</label>
+            <input type="radio" name="category" value="textbooks"><br>
+            
+            <label for="bath-body">Bath-Body</label>
+            <input type="radio" name="category" value="bath-body"><br>
+            
+            <label for="event">Event</label>
+            <input type="radio" name="category" value="event"><br>
+            
+            <label for="other">Other</label>
+            <input type="radio" name="category" value="other">
             <input type="text" name="other" value="" id="otherDesc"><br></p>
         <p><button type="submit" id="updateButton">Update</button></p>
     </form>
