@@ -11,6 +11,7 @@
 {% endblock %}
 
 <body>
+
     {% block css %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" href="">BuyMe</a>
@@ -50,7 +51,6 @@
      <div id="flashes">{% block flashes %}
    {% with messages = get_flashed_messages() %}
     {% if messages %}
-    
         <div id="messages">
             {% for msg in messages %}
             <p>{{msg}}</p>
@@ -72,7 +72,6 @@ posts" name="searchterm" aria-label="Search">
 <form id="logout" method="POST" action="{{url_for('logout')}}">
         <button id="logout" type="submit"> Log Out </button> 
 </form>
-
     <form id="register" methods="POST" action="{{url_for('register')}}">
         <button id="registerbutton" type="submit"> Register </button>
     </form>
@@ -80,17 +79,14 @@ posts" name="searchterm" aria-label="Search">
     <form id="account" method='POST' action="{{url_for('account')}}">
         <button id="account" type="submit"> My Account </button>
     </form>
+<form id="account" method="GET" action="{{url_for('uploadPost')}}">
+        <button id="upload" type="submit" name="submit" value="upload"> Upload Item </button> 
+</form>
+</div></span>
+{% endblock %}
 
-
-    <form id="account" method="GET" action="{{url_for('uploadPost')}}">
-        <button id="upload" type="submit" name="submit" value="upload"> Upload Item </button>
-    </form>
+{% block content %}
     {% endblock %}
-    <form id="search" method="POST" action="{{url_for('stringSearch')}}">
-        <input id="searchterm" placeholder="Search for posts" name="searchterm">
-        <button id="searchbutton" type="submit" name="submit" value="Search"> Search </button>
-    </form>
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 {% block sale %}
     <h1>Items for Sale</h1>
@@ -122,8 +118,6 @@ posts" name="searchterm" aria-label="Search">
 </div>
 {% endblock %}
 
-{% block content %}
-    {% endblock %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
 /*global $*/
