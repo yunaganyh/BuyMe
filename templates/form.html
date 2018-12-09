@@ -1,27 +1,31 @@
-<!doctype html>
-<html lang='en'>
+{% extends "main.html" %}
 
-<head>
-    <meta charset='utf-8'>
-    <meta name=author content="">
-    <title>Upload Item</title>
-    <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
-</head>
+{% block htmlTop %}
+    {{super()}}
+{% endblock %}
+
+{% block head %}
+    <head>
+        <meta charset='utf-8'>
+        <meta name=author content="">
+        <title>Upload Item</title>
+        <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
+    </head>
+{% endblock %}
 
 <body>
-
-    <!-- Displays error message if any errors occur in the form submission process -->
-    {% with messages = get_flashed_messages() %} {% if messages %}
-    <div id="messages">
-        {% for msg in messages %}
-        <p>{{msg}}</p>
-        {% endfor %}
-    </div>
-    {% endif %} {% endwith %} {% block main_content %}
+    {% block flashes %}
+        {{super()}} 
+    {% endblock %}
     
+    {% block buttons %}
+    {% endblock %}
+    
+    {% block main_content %}
     <h1>Welcome!</h1>
     {% endblock %}
     
+    {% block sale %}
     <!-- Upload form that takes all the necessary information for a post 
     and sends it to the backend, items table -->
     <form id="uploadform" action="{{url_for('uploadPost')}}" method="post" enctype="multipart/form-data">
@@ -66,8 +70,8 @@
         <p><label for="pic">Photo: <br> <input type="file" name="pic"></label></p>
         <p><button type="submit">Submit</button></p>
     </form>
-
     <script src="https://code.jquery.com/jquery.js"></script>
+    {% endblock %}
 </body>
 
 </html>

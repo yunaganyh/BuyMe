@@ -1,8 +1,15 @@
-<!DOCTYPE html>
+{% extends "main.html" %}
+{% block htmlTop %}
+    {{super()}}
+{% endblock %}
 <html>
     <body>
+        {% block flashes %}
+         {{super()}}
+        {% endblock %}
         
-         {% block header %}Select Category{% endblock %} 
+         <!--{% block head %}Select Category{% endblock %} -->
+         
          {% block content %}
             <form method="post" action="{{url_for('search')}}">
                 <label for="menu-category">Search from Categories:</label> 
@@ -17,6 +24,7 @@
             </form>
          {% endblock %}
         
+        {% block sale %}
         <h1>Items for Sale</h1>
         <table>
             <tr>
@@ -24,9 +32,6 @@
             <th>Description</th>
             <th>Category</th>
             <th>Price</th>
-            <th>Availability</th>
-            <th>Urgency</th>
-            <th>Check</th>
             <th>Dorm</th>
             <th>Photo</th>
             
@@ -37,8 +42,6 @@
                 <td>{{item.description}}</td>
                 <td>{{item.category}}</td>
                 <td>{{item.price}}</td>
-                <td>{{item.availability}}</td>
-                <td>{{item.urgency}}</td>
                 <td>{{item.photo}}</td>
                 <td>{{item.dorm}}</td>
                 <td>{{item.other}}</td>
@@ -48,5 +51,6 @@
             {%endfor%}
         </table>
         
+        {% endblock %}
     </body>
 </html>
