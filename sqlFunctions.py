@@ -153,18 +153,18 @@ def insertMessage(conn, sender, receiver, iid, message):
 def retrieveItemsToSellMessageForUser(conn,uid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select distinct messages.receiver, messages.sender, 
-                    messages.iid, items.description, user.name, user.username 
+                    messages.iid, items.description, user.name, user.username, user.uid 
                     from messages inner join items on messages.iid = items.iid
-                    inner join user on user.uid = messages.receiver
+                    inner join user on user.uid = messages.sender
                     where receiver = %s''',[uid])
     return curs.fetchall()
     
 def retrieveItemsToBuyMessageForUser(conn,uid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select distinct messages.receiver, messages.sender, 
-                    messages.iid, items.description, user.name, user.username
+                    messages.iid, items.description, user.name, user.username, user.uid
                     from messages inner join items on messages.iid = items.iid
-                    inner join user on user.uid = messages.sender 
+                    inner join user on user.uid = messages.receiver 
                     where sender = %s''',[uid])
     return curs.fetchall()
     
