@@ -162,7 +162,7 @@ def retrieveItemsToSellMessageForUser(conn,uid):
 def retrieveItemsToBuyMessageForUser(conn,uid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select distinct messages.receiver, messages.sender, 
-                    messages.iid, items.description. user.name, user.username
+                    messages.iid, items.description, user.name, user.username
                     from messages inner join items on messages.iid = items.iid
                     inner join user on user.uid = messages.sender 
                     where sender = %s''',[uid])

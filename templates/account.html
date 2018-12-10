@@ -90,6 +90,7 @@
 {% if isUser %}
 <h2>My conversations</h2>
 
+<div id="messages">
 <h3>Items I'm interested in</h3>
 <table id="itemsToBuyMessages">
   <tr>
@@ -130,7 +131,7 @@
   {% endfor %}
 </table>
 {% endif %}
-
+</div>
 
 <div id="updateDialog" title="Update Details For Item">
   <form id="updateForm" method='POST'>
@@ -180,6 +181,9 @@
 <script type="text/javascript">
   /*global $*/
 
+$('#messages').on('click','.openConvo', function() {
+  console.log('Correct');
+})
 
 $('#myAvailablePosts').on('click','.update',function(){
     var postID = $(this).closest('tr').data('iid');
