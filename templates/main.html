@@ -14,7 +14,7 @@
     
         {% block css %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="">BuyMe</a>
+  <a class="navbar-brand" href="{{url_for('home')}}">BuyMe</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -32,6 +32,10 @@
       <li class="nav-item">
         <a class="nav-link" href="{{url_for('getSalePosts')}}">Items For Sale</a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('uploadPost')}}">Upload Item</a>
+      </li>
+      
       
     </ul>
     <span class="navbar-text">
@@ -64,8 +68,8 @@
 <div class="btn-group justify-content-between">
     
     <form class="form-inline" id="search" method="POST" action="{{url_for('stringSearch')}}">
-        <input class="form-control mr-sm-2" id="searchterm" placeholder="Search 
-        posts" name="searchterm" aria-label="Search">
+        <input class="form-control mr-sm-2" id="searchterm" placeholder="Search posts"
+        name="searchterm" aria-label="Search">
         <button class="btn btn-outline-success my-2 my-sm-0" id="searchbutton"
         type="submit" name="submit" value="Search"> Search </button> 
     </form>
@@ -84,7 +88,8 @@
     
     <form id="account" method="GET" action="{{url_for('uploadPost')}}">
         <button id="upload" type="submit" name="submit" value="upload"> Upload Item </button> 
-    </form>
+</form>
+
 </div>
 {% endblock %}
 
@@ -172,12 +177,11 @@ function alertMessageSent(obj) {
 }
 
 function fillDialogTitle(obj) {
-    console.log(obj);
-    $('#messageUserDialog #uid').val(obj['user']['uid']);
-    $('#messageUserDialog #iid').val(obj['item']['iid']);
+    $('#messageUserDialog #uid').val(obj['uid']);
+    $('#messageUserDialog #iid').val(obj['iid']);
     $("#messageUserDialog").dialog('option','title', 
-                                    'Message ' + obj['user']['username'] + ' about '
-                                            + obj['item']['description']);
+                                    'Message ' + obj['username'] + ' about '
+                                            + obj['description']);
 }
 
 $(document).ready(function () {
