@@ -99,7 +99,7 @@
     <th>Message</th>
   </tr>
   {% for message in itemsToBuyMessages %}
-  <tr>
+  <tr data-uid={{message.uid}} data-iid={{message.iid}}>
     <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
     <td class="item">{{message.description}}</td>
     <td><button class="openConvo" name="openConvo" type="submit">Open conversation</button></td>
@@ -119,7 +119,7 @@
     <th>Message</th>
   </tr>
   {% for message in itemsToSellMessages %}
-  <tr>
+  <tr data-uid={{message.uid}} data-iid={{message.iid}}>
     <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
     <td class="item">{{message.description}}</td>
     <td><button class="openConvo" name="openConvo" type="submit">Open conversation</button></td>
@@ -182,7 +182,7 @@
   /*global $*/
 
 $('#messages').on('click','.openConvo', function() {
-  console.log('Correct');
+  
 })
 
 $('#myAvailablePosts').on('click','.update',function(){
