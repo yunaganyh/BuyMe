@@ -81,7 +81,7 @@
     <td class="price">{{post.price}}</td>
     <td class="category">{{post.category}}</td>
     <td class="other">{{post.other}}</td>
-    <td class="photo">{{post.photo}}</td>
+    <td class="photo"><img src="{{url_for('blob',iid=post.iid)}}"></td>
   </tr>
   {% endfor %}
 </table>
