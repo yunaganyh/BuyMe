@@ -306,9 +306,11 @@ def messageUser():
 @app.route('/userAndItemInfo/',methods=['POST'])
 def getUserItemInfo():
     conn = sqlFunctions.getConn('c9')
+    print request.form
     user = sqlFunctions.getUser(conn,request.form['uid'])
     item = sqlFunctions.getItemByID(conn,request.form['iid'])
-    return jsonify({'user':user,'item':item})
+    return jsonify({'uid':user['uid'],'username':user['username'],
+                    'iid':item['iid'],'description':item['description']})
 
 @app.route('/openConversation/', methods=['POST'])
 def openConversation():
