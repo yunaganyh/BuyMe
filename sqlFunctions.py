@@ -152,33 +152,21 @@ def insertMessage(conn, sender, receiver, iid, message):
 
 def retrieveItemsToSellMessageForUser(conn,uid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select distinct receiver, sender, iid from messages where receiver = %s''',[uid])
-    distinctMessages = curs.fetchall()
-    print distinctMessages
-    for i in distinctMessages:
-        curs.execute('''select distinct items.description from items inner join messages 
-                        where (items.iid = messages.iid and items.iid = %s)''',
-                        [i['iid']])
-        i['description'] = curs.fetchone()['description']
-        sender = getUser(conn, i['sender'])
-        i['name'] = sender['name']
-        i['username'] = sender['username']
-    return distinctMessages
+    curs.execute('''select distinct messages.receiver, messages.sender, 
+                    messages.iid, items.description, user.name, user.username 
+                    from messages inner join items on messages.iid = items.iid
+                    inner join user on user.uid = messages.receiver
+                    where receiver = %s''',[uid])
+    return curs.fetchall()
     
 def retrieveItemsToBuyMessageForUser(conn,uid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select distinct receiver, sender, iid from messages where sender = %s''',[uid])
-    distinctMessages = curs.fetchall()
-    print distinctMessages
-    for i in distinctMessages:
-        curs.execute('''select distinct items.description from items inner join messages 
-                        where (items.iid = messages.iid and items.iid = %s)''',
-                        [i['iid']])
-        i['description'] = curs.fetchone()['description']
-        receiver = getUser(conn, i['receiver'])
-        i['name'] = receiver['name']
-        i['username'] = receiver['username']
-    return distinctMessages
+    curs.execute('''select distinct messages.receiver, messages.sender, 
+                    messages.iid, items.description. user.name, user.username
+                    from messages inner join items on messages.iid = items.iid
+                    inner join user on user.uid = messages.sender 
+                    where sender = %s''',[uid])
+    return curs.fetchall()
     
 def markPostSold(conn, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
