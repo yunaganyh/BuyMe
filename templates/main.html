@@ -172,12 +172,11 @@ function alertMessageSent(obj) {
 }
 
 function fillDialogTitle(obj) {
-    console.log(obj);
-    $('#messageUserDialog #uid').val(obj['user']['uid']);
-    $('#messageUserDialog #iid').val(obj['item']['iid']);
+    $('#messageUserDialog #uid').val(obj['uid']);
+    $('#messageUserDialog #iid').val(obj['iid']);
     $("#messageUserDialog").dialog('option','title', 
-                                    'Message ' + obj['user']['username'] + ' about '
-                                            + obj['item']['description']);
+                                    'Message ' + obj['username'] + ' about '
+                                            + obj['description']);
 }
 
 $(document).ready(function () {
