@@ -1,27 +1,25 @@
-<!doctype html>
-<html lang='en'>
+{% extends "main.html" %}
+{% block htmlTop %}
+    {{super()}}
+{% endblock %}
+
+<body>
+
+{% block flashes %}
+    {{super()}}
+{% endblock %}
+            
+{% block buttons %}
+<h1>Welcome!</h1>
 <head>
     <meta charset='utf-8'>
     <meta name=author content="">
     <title>Registration</title>
     <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
 </head>
-<body>
-
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <div id="messages">
-        {% for msg in messages %}
-            <p>{{msg}}</p>
-        {% endfor %}
-        </div>
-    {% endif %}
-{% endwith %}
-            
-{% block main_content %}
-<h1>Welcome!</h1>
 {% endblock %}
 
+{% block sale %}
 <form id="joinform" action="{{url_for('register')}}" method="post">
     <h2>Join</h2>
     <p><label><input type="text" name="username" required pattern="^\w+$"> Username</label></p>
@@ -40,5 +38,6 @@
 </form>
 
 <script src="https://code.jquery.com/jquery.js"></script>
+{% endblock %}
 </body>
 </html>

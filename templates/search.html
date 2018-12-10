@@ -1,21 +1,22 @@
+ 
  {% block header %}<h1>{{category}}</h1>{% endblock %} 
  {% block content %}
     <form method="post" action="{{url_for('search')}}">
       <table>
           <tr>
+            <th>Contact</th>
             <th>Description</th>
             <th>Category</th>
             <th>Price</th>
-            <th>Dorm</th>
             <th>Photo</th>
+            <th>Other</th>
             </tr>
            {% for item in cat %}
            <tr id=iid value={{item.iid}}>
-                <!--<td>{{item.name}}</td>-->
+                <td>{{item.name}}</td>
                 <td>{{item.description}}</td>
                 <td>{{item.category}}</td>
                 <td>{{item.price}}</td>
-                <td>{{item.dorm}}</td>
                 <td><img src="{{url_for('blob',iid=item.iid)}}"></td>
                 <td>{{item.other}}</td>
                 <td>
