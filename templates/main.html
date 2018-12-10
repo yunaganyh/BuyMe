@@ -11,8 +11,8 @@
 {% endblock %}
 
 <body>
-
-    {% block css %}
+    
+        {% block css %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" href="">BuyMe</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,14 +64,16 @@
 <div class="btn-group justify-content-between">
     
     <form class="form-inline" id="search" method="POST" action="{{url_for('stringSearch')}}">
-            <input class="form-control mr-sm-2" id="searchterm" placeholder="Search 
-posts" name="searchterm" aria-label="Search">
-            <button class="btn btn-outline-success my-2 my-sm-0" id="searchbutton"
-            type="submit" name="submit" value="Search"> Search </button> 
+        <input class="form-control mr-sm-2" id="searchterm" placeholder="Search 
+        posts" name="searchterm" aria-label="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0" id="searchbutton"
+        type="submit" name="submit" value="Search"> Search </button> 
     </form>
-<form id="logout" method="POST" action="{{url_for('logout')}}">
+    
+    <form id="logout" method="POST" action="{{url_for('logout')}}">
         <button id="logout" type="submit"> Log Out </button> 
-</form>
+    </form>
+    
     <form id="register" methods="POST" action="{{url_for('register')}}">
         <button id="registerbutton" type="submit"> Register </button>
     </form>
@@ -79,15 +81,16 @@ posts" name="searchterm" aria-label="Search">
     <form id="account" method='POST' action="{{url_for('account')}}">
         <button id="account" type="submit"> My Account </button>
     </form>
-<form id="account" method="GET" action="{{url_for('uploadPost')}}">
+    
+    <form id="account" method="GET" action="{{url_for('uploadPost')}}">
         <button id="upload" type="submit" name="submit" value="upload"> Upload Item </button> 
 </form>
+
 </div>
 {% endblock %}
 
 {% block content %}
     {% endblock %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 {% block sale %}
     <h1>Items for Sale</h1>
 
@@ -99,28 +102,102 @@ posts" name="searchterm" aria-label="Search">
                 <th>Description</th>
                 <th>Price</th>
                 <th>Category</th>
+                <th>Other</th>
                 <th>Photo</th>
-                <th>Time Uploaded</th>
             </tr>
             {% for post in posts %}
 
-            <tr class="tt" data-tt="{post.iid}}">
+            <tr id = "post" data-iid="{{post.iid}}" data-uid="{{post.uid}}">
                 <td class="name"><a href="{{url_for('account',usernameInput=post.username)}}">{{post.name}}</td>
                 <td class="description">{{post.description}}</td>
                 <td class="price">${{post.price}}</td>
                 <td class="category">{{post.category}}</td>
+                <td class="other">{{post.other}}</td>
                 <td class="photo"><img src="{{url_for('blob',iid=post.iid)}}"></td>
-                <td class="time">{{post.uploaded}}</td>
-                 </tr>
-               {% endfor %}
-              </table>
-           
+                {% if currentUser != '' and currentUser != post.username %}
+                <td><button type="submit" class="messageUser">Message user</button></td>
+                <td><form method="post" name="message" action="{{url_for('messageUser')}}">
+                    <input type="hidden" name="message"></form>
+                </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </table>
+    
+        <div id="messageUserDialog" title="Message User">
+            <form id="messageToUser" method='POST'>
+                <input type="hidden" name="uid" id="uid" value="">
+                <input type="hidden" name="iid" id="iid" value="">
+                <p><label><textarea id="messageBody" rows="4" cols="50" maxlength="200" name="messageBody"></textarea></label></p>
+                <p><button type="submit" id="messageButton">Send Message</button></p>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+
 <script>
 /*global $*/
+
+$('#posts-list').on('click','.messageUser',function(event){
+    var postUID = $(this).closest('tr').data('uid');
+    var postIID = $(this).closest('tr').data('iid');
+    console.log(postUID);
+    console.log(postIID);
+    $.post("{{url_for('getUserItemInfo')}}",
+        {'uid':postUID,'iid':postIID},
+        fillDialogTitle)
+    $("#messageUserDialog").dialog("open");
+})
+
+$('#messageButton').click(function(){
+  var uid = $('#messageUserDialog #uid').val();
+  var iid = $('#messageUserDialog #iid').val();
+  var description = $('#messageUserDialog #messageBody').val();
+  $.post("{{url_for('messageUser')}}",
+        {'uid':uid,'iid':iid,'description':description}, 
+        alertMessageSent);
+})
+
+function alertMessageSent(obj) {
+    if (obj['last_insert_id()']) {
+        alert('Message sent successfully');
+    } else {
+        alert ('Message not sent. Please try again.')
+    }
+}
+
+function fillDialogTitle(obj) {
+    console.log(obj);
+    $('#messageUserDialog #uid').val(obj['user']['uid']);
+    $('#messageUserDialog #iid').val(obj['item']['iid']);
+    $("#messageUserDialog").dialog('option','title', 
+                                    'Message ' + obj['user']['username'] + ' about '
+                                            + obj['item']['description']);
+}
+
+$(document).ready(function () {
+    $(function () {
+        $("#messageUserDialog").dialog({
+
+            autoOpen: false,
+            modal: true,
+            show: {
+                effect: "blind",
+                duration: 1000
+            },
+            hide: {
+                effect: "explode",
+                duration: 1000
+            }
+        });
+    });
+});
 </script>
 
 
