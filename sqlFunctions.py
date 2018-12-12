@@ -141,6 +141,11 @@ def updatePostPhoto(conn, photo, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''update items set photo = %s where iid=%s''',[photo,iid])
     
+def updatePostEmptyPhoto(conn,iid):
+    """Update posts with null value if no photo selected"""
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''update items set photo = NULL where iid=%s''',[iid])
+    
 #insert message into message table
 def insertMessage(conn, sender, receiver, iid, message):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)

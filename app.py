@@ -165,7 +165,7 @@ def getSalePosts():
     conn = sqlFunctions.getConn('c9')
     # retrieves the posts from the database
     saleposts=sqlFunctions.getItemsForSale(conn, "seller")
-    print saleposts
+    # print saleposts
     currentUser = ''
     if 'username' in session:
         currentUser = session['username']
@@ -213,8 +213,14 @@ def uploadPost():
             category = request.form.get('category')
             other = request.form.get('other')
             role = request.form.get('role')
+            if 'pic' not in request.files:
+                flash('No file part')
+                sqlFunctions.updatePostEmptyPhoto(conn,iid) 
+                return redirect(request.url)
+            
             
             f = request.files['pic']
+        
             fsize = os.fstat(f.stream.fileno()).st_size
             print 'file size is ',fsize
             
@@ -350,4 +356,4 @@ def stringSearch():
             return render_template("search.html", cat=keyword)
 if __name__ == '__main__':
     app.debug = True
-    app.run('0.0.0.0',8080)
+    app.run('0.0.0.0',8081)
