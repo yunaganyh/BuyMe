@@ -165,33 +165,34 @@ def getSalePosts():
     # retrieves the posts from the database
     saleposts=sqlFunctions.getItemsForSale(conn,"seller")
     print saleposts
+
     currentUser = ''
     if 'username' in session:
         currentUser = session['username']
     return render_template('forsale.html', posts=saleposts, currentUser = currentUser)
 
+#returns images to display on items for sale
 @app.route('/blob/<iid>')
 def blob(iid):
     conn = sqlFunctions.getConn('c9')
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     numrows = curs.execute('''select iid,photo from items
                             where iid = %s''', [iid])
-    if numrows == 0:
-        flash('No picture for item {}'.format(iid))
-        return redirect(url_for('home'))
     row = curs.fetchone()
     photo = row['photo']
+    print photo
+    #below does not work but attempts to specify a default image
+    #if there is no image uploaded by the user
+    #specifies a filepath for the img src the return will pass into
+    #realized raw image data might need to be read instead of a filepath
+    #but uncertain how to do that -- deleted noPic.png for now
+    if photo == "EMPTY_BLOB()":
+        photo = os.path.join('../static', 'noPic.png')
+        print photo
+        return Response(photo, mimetype='photo/png')
+        
     print "photo info",len(photo),imghdr.what(None,photo)
     return Response(photo, mimetype='photo/'+imghdr.what(None,photo))
-    
-@app.route('/blobs/')
-def blobs():
-    conn = sqlFunctions.getConn('c9')
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select iid,photo from items')
-    pics = curs.fetchall()
-    print len(pics), 'found'
-    return render_template('main.html',pics=pics)
 
 """
 Handles the upload form submission
@@ -212,32 +213,40 @@ def uploadPost():
             category = request.form.get('category')
             other = request.form.get('other')
             role = request.form.get('role')
+            photo = ""
+            itemDict = {}
+            #first check is a picture is uploaded before formatting it
+            if 'pic' not in request.files:
+                #specify as empty blob so when checking the database 
+                #later a known value can be checked and 
+                #this known value can be anticipated in conditionals
+                photo = "EMPTY_BLOB()"
+                itemDict = {'description': description, 'price': price,
+                'category': category, 'other': other, 'photo': photo, 'role': role}
+            else :
+                f = request.files['pic']
+                fsize = os.fstat(f.stream.fileno()).st_size
+                if fsize > app.config['MAX_UPLOAD']:
+                    raise Exception('File is too big')
+                mime_type = imghdr.what(f.stream)
+                if mime_type not in ['jpeg','gif','png']:
+                    raise Exception('Not a JPEG, GIF or PNG: {}'.format(mime_type))
+                photo = f.read()
+                
+                itemDict = {'description': description, 'price': price,
+                'category': category, 'other': other, 'photo': photo, 'role': role}
             
-            f = request.files['pic']
-            fsize = os.fstat(f.stream.fileno()).st_size
-            print 'file size is ',fsize
-            
-            if fsize > app.config['MAX_UPLOAD']:
-                raise Exception('File is too big')
-            mime_type = imghdr.what(f.stream)
-            if mime_type not in ['jpeg','gif','png']:
-                raise Exception('Not a JPEG, GIF or PNG: {}'.format(mime_type))
-            photo = f.read()
-            
-            itemDict = {'description': description, 'price': price,
-            'category': category, 'other': other, 'photo': photo, 'role': role}
-            
-            # below is to assign an item to a specific user
-            # status = ('username' in session)
-            # print status
+            # assign an item to a specific user in posts table
             if 'user' in session:
                 uid = session['user']
-                sqlFunctions.insertNewItem(conn, itemDict) #add item to the database
+                sqlFunctions.insertNewItem(conn, itemDict)
                 iid = sqlFunctions.getLatestItem(conn)
                 iid = iid['last_insert_id()']
-                sqlFunctions.insertNewPost(conn,uid,iid) #add uid and iid to post table
+                sqlFunctions.insertNewPost(conn,uid,iid) 
         except Exception as err:
-            flash('form submission error '+str(err))
+            # flash('form submission error '+str(err))
+            flash('please fill out all entries')
+            return render_template('form.html')
     return redirect(url_for('home'))
 
 """
@@ -384,4 +393,4 @@ def getBuyPosts():
         
 if __name__ == '__main__':
     app.debug = True
-    app.run('0.0.0.0',8080)
+    app.run('0.0.0.0',8081)

@@ -8,7 +8,7 @@ import MySQLdb
 # return the connection to MySQLdb 
 def getConn(db):
     conn = MySQLdb.connect(host='localhost',
-                           user='ubuntu',
+                           user='kealani',
                            passwd='',
                            db=db)
     conn.autocommit(True)
@@ -69,7 +69,7 @@ def getUserPassword(conn, username):
 def insertNewItem(conn, item):
     """Insert item into items table"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    # print item['photo']
+    print item['photo']
     curs.execute('''insert into items (description, price,category, other, photo, role) values 
                     (%s,%s,%s,%s, %s,%s)''', 
                     [item['description'], item['price'], item['category'],
