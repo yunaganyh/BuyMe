@@ -180,7 +180,6 @@ def blob(iid):
                             where iid = %s''', [iid])
     row = curs.fetchone()
     photo = row['photo']
-    print photo
     #below does not work but attempts to specify a default image
     #if there is no image uploaded by the user
     #specifies a filepath for the img src the return will pass into
@@ -188,9 +187,7 @@ def blob(iid):
     #but uncertain how to do that -- deleted noPic.png for now
     if photo == "EMPTY_BLOB()":
         photo = os.path.join('../static', 'noPic.png')
-        print photo
         return Response(photo, mimetype='photo/png')
-        
     print "photo info",len(photo),imghdr.what(None,photo)
     return Response(photo, mimetype='photo/'+imghdr.what(None,photo))
 
