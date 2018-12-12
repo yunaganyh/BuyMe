@@ -87,7 +87,8 @@ def getItemsForSale(conn, role):
     """Retrieve items based on whether
     role is seller or buyer"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select items.*, posts.*,user.username, user.name,user.dorm 
+    curs.execute('''select items.iid, items.description,items.price,
+                    items.category,items.other,items.role, posts.*,user.username, user.name,user.dorm 
                     from items inner join posts on items.iid=posts.iid 
                     inner join user on user.uid=posts.uid where items.role=%s''',[role])
     return curs.fetchall()
@@ -95,7 +96,7 @@ def getItemsForSale(conn, role):
 def getItemByID(conn, iid):
     """Get item by ID(iid)"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select * from items where iid=%s''',[iid])
+    curs.execute('''select iid,description,price,category,other,role from items where iid=%s''',[iid])
     return curs.fetchone()
 
 def getLatestItem(conn):
@@ -194,7 +195,7 @@ def getMessageInfo(conn, uid, iid):
 def getItembyCategory(conn,category):
     """Gets items based on specified category"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select items.*, posts.*,user.name,user.dorm from items inner 
+    curs.execute('''select items.description, items.iid, posts.*,user.name,user.dorm from items inner 
     join posts on items.iid=posts.iid inner join user on user.uid=posts.uid where (category=%s and posts.sold=true)''',[category])
     return curs.fetchall()
     
@@ -202,7 +203,8 @@ def partialDescription(conn,keyword):
     """Gets items based on partial string search term"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor) # SQL query from wmdb, to get id's movies
     word = "%" + keyword +"%"
-    curs.execute('''select items.*, posts.*,user.username,user.name from items inner join posts on items.iid=posts.iid inner join user on user.uid=posts.uid where (description like %s and posts.sold = true)''',[word])
+    curs.execute('''select items.iid,items.description,items.price,items.category,
+                    items.other,items.role, posts.*,user.username,user.name from items inner join posts on items.iid=posts.iid inner join user on user.uid=posts.uid where (description like %s and posts.sold = true)''',[word])
     results= curs.fetchall()
     return results
 

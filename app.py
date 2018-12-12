@@ -295,6 +295,7 @@ def markPostSold():
 def messageUser():
     """Send a message to a user about the post in the table."""
     conn = sqlFunctions.getConn('c9')
+    print request.form
     messageID = None
     if 'user' in session:
         user = session['user']
@@ -309,6 +310,9 @@ def getUserItemInfo():
     conn = sqlFunctions.getConn('c9')
     user = sqlFunctions.getUser(conn,request.form['uid'])
     item = sqlFunctions.getItemByID(conn,request.form['iid'])
+    print 'HELLO'
+    print user
+    print item
     return jsonify({'uid':user['uid'],'username':user['username'],
                     'iid':item['iid'],'description':item['description']})
                     

@@ -65,8 +65,8 @@
 <!--<p>Logged in as: {{username}}</p>-->
 <div class="btn-group justify-content-between">
     <form class="form-inline" id="search" method="POST" action="{{url_for('stringSearch')}}">
-        <input class="form-control mr-sm-2" id="searchterm" placeholder="Search 
-        posts" name="searchterm" aria-label="Search">
+        <input class="form-control mr-sm-2" id="searchterm" 
+        placeholder="Search posts" name="searchterm" aria-label="Search">
         <button class="btn btn-outline-success my-2 my-sm-0" id="searchbutton"
         type="submit" name="submit" value="Search"> Search </button> 
     </form>
@@ -168,6 +168,8 @@ function sanitize(string) {
 $('#posts-list').on('click','.messageUser',function(event){
     var postUID = $(this).closest('tr').data('uid');
     var postIID = $(this).closest('tr').data('iid');
+    console.log(postUID);
+    console.log(postIID);
     $.post("{{url_for('getUserItemInfo')}}",
         {'uid':postUID,'iid':postIID},
         fillDialogTitle)
@@ -177,7 +179,7 @@ $('#posts-list').on('click','.messageUser',function(event){
 $('#messageButton').click(function(){
   var uid = $('#messageUserDialog #uid').val();
   var iid = $('#messageUserDialog #iid').val();
-  var description = sanitize(('#messageUserDialog #messageBody').val());
+  var description = sanitize($('#messageUserDialog #messageBody').val());
   $.post("{{url_for('messageUser')}}",
         {'uid':uid,'iid':iid,'description':description}, 
         alertMessageSent);
@@ -192,12 +194,11 @@ function alertMessageSent(obj) {
 }
 
 function fillDialogTitle(obj) {
-    console.log(obj);
-    $('#messageUserDialog #uid').val(obj['user']['uid']);
-    $('#messageUserDialog #iid').val(obj['item']['iid']);
+    $('#messageUserDialog #uid').val(obj['uid']);
+    $('#messageUserDialog #iid').val(obj['iid']);
     $("#messageUserDialog").dialog('option','title', 
-                                    'Message ' + obj['user']['username'] + ' about '
-                                            + obj['item']['description']);
+                                    'Message ' + obj['username'] + ' about '
+                                            + obj['description']);
 }
 
 $(document).ready(function () {
