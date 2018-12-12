@@ -71,7 +71,7 @@
     </form>
     
     <form id="logout" method="POST" action="{{url_for('logout')}}">
-        <button id="logout" type="submit"> Log Out </button> 
+        <button id="logoutButton" type="submit"> Log Out </button> 
     </form>
     
     <form id="account" method="GET" action="{{url_for('uploadPost')}}">
@@ -139,12 +139,23 @@
 
 <script>
 /*global $*/
+  
+function sanitize(string) {
+  const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      "/": '&#x2F;',
+  };
+  const reg = /[&<>"'/]/ig;
+  return string.replace(reg, (match)=>(map[match]));
+}
 
 $('#posts-list').on('click','.messageUser',function(event){
     var postUID = $(this).closest('tr').data('uid');
     var postIID = $(this).closest('tr').data('iid');
-    console.log(postUID);
-    console.log(postIID);
     $.post("{{url_for('getUserItemInfo')}}",
         {'uid':postUID,'iid':postIID},
         fillDialogTitle)
@@ -154,7 +165,7 @@ $('#posts-list').on('click','.messageUser',function(event){
 $('#messageButton').click(function(){
   var uid = $('#messageUserDialog #uid').val();
   var iid = $('#messageUserDialog #iid').val();
-  var description = $('#messageUserDialog #messageBody').val();
+  var description = sanitize(('#messageUserDialog #messageBody').val());
   $.post("{{url_for('messageUser')}}",
         {'uid':uid,'iid':iid,'description':description}, 
         alertMessageSent);

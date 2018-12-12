@@ -26,6 +26,7 @@ app.config['MAX_UPLOAD'] = 260000
 #homepage that renders all posts     
 @app.route('/', methods=['GET','POST'])
 def home():
+    """Displays all available posts and actionable buttons."""
     conn = sqlFunctions.getConn('c9')
     posts = sqlFunctions.getAvailableItemsAndUsers(conn)
     currentUser = ''
@@ -33,9 +34,9 @@ def home():
         currentUser = session['username']
     return render_template('main.html', posts = posts, currentUser = currentUser)
 
-#register user and add them into the user database
 @app.route('/register/', methods=['GET','POST'])
 def register():
+    """Register a new user and requires a unique username."""
     conn = sqlFunctions.getConn('c9')
     if request.method == 'GET':
         return render_template('registration.html')
@@ -77,10 +78,12 @@ def register():
             flash('form submission error '+str(err))
     return redirect(request.referrer)
 
-#account page for user    
 @app.route('/account/', defaults={'usernameInput':''}, methods=['POST','GET'])
 @app.route('/account/<usernameInput>', methods=['POST','GET'])
 def account(usernameInput):
+    """Shows a user's information and available and sold posts. If the user
+    trying to look at the page is the owner of the account, then the user's
+    messages and options to update, delete, and mark a post as sold is shown."""
     conn = sqlFunctions.getConn('c9')
     #check if user is in session
     try: 
@@ -193,14 +196,12 @@ def blobs():
     print len(pics), 'found'
     return render_template('main.html',pics=pics)
 
-"""
-Handles the upload form submission
-Retrieves inputs from the form and creates a dictionary that will be passed into
-a function that extracts the different compenents to insert the item into the 
-Items table
-"""
 @app.route('/upload/', methods=['GET','POST'])
 def uploadPost():
+    """Handles the upload form submission
+    Retrieves inputs from the form and creates a dictionary that will be passed into
+    a function that extracts the different compenents to insert the item into the 
+    Items table"""
     conn = sqlFunctions.getConn('c9')
     test = True
     if request.method == 'GET':
@@ -240,24 +241,19 @@ def uploadPost():
             flash('form submission error '+str(err))
     return redirect(url_for('home'))
 
-"""
-Retrieves a post from the form 
-and returns it in JSON format 
-"""
 @app.route('/retrievePost/', methods=['POST'])
 def retrievePost():
+    """Retrieves a post from the form and returns it in JSON format"""
     conn = sqlFunctions.getConn('c9')
     iid = request.form['iid']
     item = sqlFunctions.getItemByID(conn, iid)
     return jsonify(item)
     
-"""
-Handles updating the post
-Takes inputs from the update posts form, updates the items,
-and returns the item JSON formatted
-"""
 @app.route('/updatePost/', methods=['POST'])
 def updatePost():
+    """Handles updating the post
+    Takes inputs from the update posts form, updates the items,
+    and returns the item JSON formatted"""
     conn = sqlFunctions.getConn('c9')
     try:
         iid = request.form['iid']
@@ -274,17 +270,17 @@ def updatePost():
         flash('Invalid item')
     return jsonify({})
  
-"""
-Deletes a post and returns
-"""
 @app.route('/deletePost/', methods=['POST'])
 def deletePost():  
+    """Deletes a post and returns"""
     conn = sqlFunctions.getConn('c9')
     sqlFunctions.deleteItem(conn,request.form['iid'])
     return jsonify(request.form['iid'])
 
 @app.route('/markPostSold/', methods=['POST'])
 def markPostSold():
+    """Mark a post as sold on the account page and moves it from the list of 
+    available posts to the list of sold posts."""
     conn = sqlFunctions.getConn('c9')
     sqlFunctions.markPostSold(conn,request.form['iid'])
     return jsonify(request.form['iid'])
@@ -292,6 +288,7 @@ def markPostSold():
 
 @app.route('/messageUser/',methods=['POST'])
 def messageUser():
+    """Send a message to a user about the post in the table."""
     conn = sqlFunctions.getConn('c9')
     messageID = None
     if 'user' in session:
@@ -303,55 +300,46 @@ def messageUser():
     
 @app.route('/userAndItemInfo/',methods=['POST'])
 def getUserItemInfo():
+    """Returns user and item information as a json object."""
     conn = sqlFunctions.getConn('c9')
     user = sqlFunctions.getUser(conn,request.form['uid'])
     item = sqlFunctions.getItemByID(conn,request.form['iid'])
     return jsonify({'uid':user['uid'],'username':user['username'],
                     'iid':item['iid'],'description':item['description']})
-
-@app.route('/openConversation/', methods=['POST'])
-def openConversation():
-    conn = sqlFunctions.getConn('c9')
-
-@app.route('/sale/',methods=['GET','POST'])
-def search():
-    if request.method=="GET":
-        return render_template('forsale.html')
-    else:
-        category=request.form.get('menu-category')
-        # print category
-        return redirect(url_for('searchCategory',category=category))
-
+                    
+@app.route('/sale/', defaults ={'category':''}, methods=['GET','POST'])
 @app.route('/sale/<category>', methods=['GET','POST'])
-def searchCategory(category):
+def search(category):
     conn = sqlFunctions.getConn('c9')
-    if request.method=="GET":
-        cat=sqlFunctions.getItembyCategory(conn,category)
-        if cat:
-            return render_template('search.html',cat=cat,category=category)
-        else:
-            flash("There are no posts in this category")
-            return redirect(request.referrer)
-    
-@app.route('/stringSearch/', methods=['GET','POST'])
-def stringSearch():
+    if request.method=="POST":
+        category=request.form.get('menu-category')
+        return redirect(url_for('search',category=category))
+    cat=sqlFunctions.getItembyCategory(conn,category)
+    if cat:
+        return render_template('search.html',posts=cat,category=category)
+    else:
+        flash("There are no posts in this category")
+        return redirect(url_for('getSalePosts'))
+
+@app.route('/stringSearch/', defaults={'searchWord':''}, methods=['GET','POST'])   
+@app.route('/stringSearch/<searchWord>', methods=['GET','POST'])
+def stringSearch(searchWord):
     conn=sqlFunctions.getConn('c9')
     if request.method=="POST":
         searchWord = request.form.get('searchterm')
-        return redirect( url_for('stringSearchword', searchWord=searchWord))
-    
-@app.route('/stringSearch/<searchWord>', methods=['GET','POST'])
-def  stringSearchword(searchWord):
-    conn=sqlFunctions.getConn('c9')
+        return redirect(url_for('stringSearch',searchWord=searchWord))
+    print searchWord
     results=sqlFunctions.partialDescription(conn,searchWord)
+    print results
     if not results:
             flash("There is no post that matches this keyword.")
-            return redirect(request.referrer)
+            return redirect(url_for('getSalePosts'))
     else:
         return render_template("search.html", posts=results)
-            
+          
 @app.route('/retrieveMessages/', methods=['POST'])
 def retrieveMessages():
+    """Retrieves messages between a sender and receiver about a unique item."""
     conn = sqlFunctions.getConn('c9')
     try: 
         loggedIn = session['logged_in']
