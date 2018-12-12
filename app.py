@@ -164,7 +164,7 @@ def logout():
 def getSalePosts():
     conn = sqlFunctions.getConn('c9')
     # retrieves the posts from the database
-    saleposts=sqlFunctions.getItemsForSale(conn, "seller")
+    saleposts=sqlFunctions.getAvailableItemsAndUsers(conn)
     print saleposts
     currentUser = ''
     if 'username' in session:
@@ -336,18 +336,22 @@ def searchCategory(category):
             flash("There are no posts in this category")
             return redirect(request.referrer)
     
-@app.route('/stringSearch/', methods=['POST'])
+@app.route('/stringSearch/', methods=['GET','POST'])
 def stringSearch():
     conn=sqlFunctions.getConn('c9')
     if request.method=="POST":
         searchWord = request.form.get('searchterm')
-        # print searchWord
-        keyword=sqlFunctions.partialDescription(conn,searchWord)
-        if not keyword:
+        return redirect( url_for('stringSearchword', searchWord=searchWord))
+    
+@app.route('/stringSearch/<searchWord>', methods=['GET','POST'])
+def  stringSearchword(searchWord):
+    conn=sqlFunctions.getConn('c9')
+    results=sqlFunctions.partialDescription(conn,searchWord)
+    if not results:
             flash("There is no post that matches this keyword.")
             return redirect(request.referrer)
-        else:
-            return render_template("search.html", cat=keyword)
+    else:
+        return render_template("search.html", posts=results)
 if __name__ == '__main__':
     app.debug = True
     app.run('0.0.0.0',8080)
