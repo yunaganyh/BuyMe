@@ -244,7 +244,7 @@ def uploadPost():
                 iid = iid['last_insert_id()']
                 sqlFunctions.insertNewPost(conn,uid,iid) 
         except Exception as err:
-            flash('form submission error '+str(err))
+            # flash('form submission error '+str(err))
             flash('please fill out all entries')
             return render_template('form.html')
     return redirect(url_for('home'))
