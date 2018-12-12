@@ -1,30 +1,12 @@
+{% extends "main.html" %}
+
+{% block htmlTop %}
+    {{super()}}
+{% endblock %}
+ {% block head %}<h1>{{category}}</h1>{% endblock %} 
  
- {% block header %}<h1>{{category}}</h1>{% endblock %} 
- {% block content %}
-    <form method="post" action="{{url_for('search')}}">
-      <table>
-          <tr>
-            <th>Contact</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Photo</th>
-            <th>Other</th>
-            </tr>
-           {% for item in cat %}
-           <tr id=iid value={{item.iid}}>
-                <td>{{item.name}}</td>
-                <td>{{item.description}}</td>
-                <td>{{item.category}}</td>
-                <td>{{item.price}}</td>
-                <td><img src="{{url_for('blob',iid=item.iid)}}"></td>
-                <td>{{item.other}}</td>
-                <td>
-               <button id="userinfo" type="submit" name="submit" value="userinfo"> Send Message </button>  </td>
-            </tr>
-            {% endfor %}
-      </table>
-    </form>
+ {% block sale %}
+   {{super()}}
  {% endblock %}
  
  

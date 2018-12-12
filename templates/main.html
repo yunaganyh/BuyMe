@@ -32,11 +32,7 @@
       <li class="nav-item">
         <a class="nav-link" href="{{url_for('getSalePosts')}}">Items For Sale</a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{url_for('uploadPost')}}">Upload Item</a>
-      </li>
-      
-      
+     
     </ul>
     <span class="navbar-text">
     <nav class="navbar navbar-light bg-light">
@@ -78,14 +74,6 @@
         <button id="logout" type="submit"> Log Out </button> 
     </form>
     
-    <form id="register" methods="POST" action="{{url_for('register')}}">
-        <button id="registerbutton" type="submit"> Register </button>
-    </form>
-
-    <form id="account" method='POST' action="{{url_for('account')}}">
-        <button id="account" type="submit"> My Account </button>
-    </form>
-    
     <form id="account" method="GET" action="{{url_for('uploadPost')}}">
         <button id="upload" type="submit" name="submit" value="upload"> Upload Item </button> 
 </form>
@@ -98,9 +86,10 @@
 {% block sale %}
     <h1>Items for Sale</h1>
 
-    <div id="sposts">
+    <div class="table responsive" id="sposts">
 
-        <table id="posts-list">
+        <table class="table table-hover" id="posts-list">
+            <thead class="thead-light">
             <tr>
                 <th>Contact</th>
                 <th>Description</th>
@@ -108,7 +97,10 @@
                 <th>Category</th>
                 <th>Other</th>
                 <th>Photo</th>
+                <th>Message</th>
             </tr>
+            </thead>
+            
             {% for post in posts %}
 
             <tr id = "post" data-iid="{{post.iid}}" data-uid="{{post.uid}}">
