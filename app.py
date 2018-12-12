@@ -81,7 +81,6 @@ def register():
 @app.route('/account/', defaults={'usernameInput':''}, methods=['POST','GET'])
 @app.route('/account/<usernameInput>', methods=['POST','GET'])
 def account(usernameInput):
-    print request.method
     conn = sqlFunctions.getConn('c9')
     #check if user is in session
     try: 
@@ -294,7 +293,6 @@ def markPostSold():
 @app.route('/messageUser/',methods=['POST'])
 def messageUser():
     conn = sqlFunctions.getConn('c9')
-    print request.form
     messageID = None
     if 'user' in session:
         user = session['user']
@@ -306,7 +304,6 @@ def messageUser():
 @app.route('/userAndItemInfo/',methods=['POST'])
 def getUserItemInfo():
     conn = sqlFunctions.getConn('c9')
-    print request.form
     user = sqlFunctions.getUser(conn,request.form['uid'])
     item = sqlFunctions.getItemByID(conn,request.form['iid'])
     return jsonify({'uid':user['uid'],'username':user['username'],
@@ -348,6 +345,24 @@ def stringSearch():
             return redirect(request.referrer)
         else:
             return render_template("search.html", cat=keyword)
+            
+@app.route('/retrieveMessages/', methods=['POST'])
+def retrieveMessages():
+    conn = sqlFunctions.getConn('c9')
+    try: 
+        loggedIn = session['logged_in']
+    except:
+        loggedIn = None
+    if loggedIn:
+        uid = session['user']['uid']
+        convoHolder = request.form['uid']
+        iid = request.form['iid']
+        messages = sqlFunctions.retrieveMessages(conn, uid, convoHolder, iid)
+        return jsonify({'messages':messages, 'sender':request.form['sender']})
+    else:
+        flash('User not logged in')
+        return redirect(url_for('home'))
+        
 if __name__ == '__main__':
     app.debug = True
     app.run('0.0.0.0',8080)

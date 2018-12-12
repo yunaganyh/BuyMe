@@ -102,7 +102,7 @@
   <tr data-uid={{message.uid}} data-iid={{message.iid}}>
     <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
     <td class="item">{{message.description}}</td>
-    <td><button class="openConvo" name="openConvo" type="submit">Open conversation</button></td>
+    <td><button class="openConvo" name="senderIsUser" type="submit">Open conversation</button></td>
     <td>
       <form method="post" action="{{url_for('openConversation')}}">
         </form>
@@ -122,7 +122,7 @@
   <tr data-uid={{message.uid}} data-iid={{message.iid}}>
     <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
     <td class="item">{{message.description}}</td>
-    <td><button class="openConvo" name="openConvo" type="submit">Open conversation</button></td>
+    <td><button class="openConvo" name="senderNotUser" type="submit">Open conversation</button></td>
     <td>
       <form method="post" action="{{url_for('openConversation')}}">
         </form>
@@ -169,9 +169,17 @@
             
             <label for="other">Other</label>
             <input type="radio" name="category" id="other" value="other">
-            <input type="text" name="other" value="" id="otherDesc"><br></p>
+            <input type="text" name="other" value="" id="otherDesc"><br></p></label>
         <p><button type="submit" id="updateButton">Update</button></p>
     </form>
+</div>
+
+<div id="convoDialog">
+  <input type="hidden" id="messageIID" value="">
+  <input type="hidden" id="messageSender" value="">
+  <table id="conversation"></table>
+  <textarea id="reply" rows="4" cols="50"></textarea>
+  <p><button type=submit id="replyButton">Submit Reply</button></p>
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -181,8 +189,22 @@
 <script type="text/javascript">
   /*global $*/
 
+$('#replyButton').click(function(){
+  var reply = $('#reply').val();
+  var sender = $('#convoDialog #messageSender').val();
+  var iid = $('#convoDialog #messageIID').val();
+  $.post("{{url_for('messageUser')}}",
+        {'uid':sender,'description':reply,'iid':iid}, closeConvo)
+})
+
 $('#messages').on('click','.openConvo', function() {
-  
+  var iid = $(this).closest('tr').data('iid');
+  var uid = $(this).closest('tr').data('uid');
+  var buttonClicked = $(this).attr('name');
+  $.post("{{url_for('retrieveMessages')}}",
+        {'iid':iid,'uid':uid, 'sender':buttonClicked}, 
+        fillConvoDialog);
+  $('#convoDialog').dialog('open');
 })
 
 $('#myAvailablePosts').on('click','.update',function(){
@@ -212,6 +234,25 @@ $('#updateButton').click(function(){
             'otherDesc':otherDesc,'iid':iid}, 
             updatePostInfo);
 });
+
+function fillConvoDialog(obj) {
+  $('#conversation').empty();
+  $('#reply').val('');
+  if (obj['sender']=="senderNotUser"){
+    $('#convoDialog #messageSender').val(obj['messages'][0]['sender']);
+  } else {
+    $('#convoDialog #messageSender').val(obj['messages'][0]['receiver']);
+  }
+  $('#convoDialog #messageIID').val(obj['messages'][0]['iid']);
+  $('#conversation').append(
+    '<tr><th>User</th><th>Message</th><th>Time sent</th></tr>')
+  for (var message in obj['messages']){
+    var m = obj['messages'][message];
+    $('#convoDialog #conversation').append('<tr><td>' + m['username'] + '</td><td>'
+    + m['message']+ '</td><td>' + m['messageSent'].split(' ').slice(0,-1).join(' ') 
+    + '</td></tr>');
+  }
+}
 
 function markPostAsSold(obj) {
   var row =  $("[data-iid='" + obj + "']").closest("tr");
@@ -249,6 +290,15 @@ function fillDialogForm(obj){
   $("#" + obj['category']).prop("checked", true);
 }
 
+function closeConvo(obj){
+  if (obj) {
+    $('#convoDialog').dialog('close');
+    alert('Message successfully sent.')
+  } else{
+    alert('Message not sent.')
+  }
+}
+
 $(document).ready(function () {
     $(function () {
         $("#updateDialog").dialog({
@@ -257,11 +307,29 @@ $(document).ready(function () {
             modal: true,
             show: {
                 effect: "blind",
-                duration: 1000
+                duration: 500
             },
             hide: {
-                effect: "explode",
-                duration: 1000
+                effect: "drop",
+                duration: 500
+            }
+        });
+    });
+});
+
+$(document).ready(function () {
+    $(function () {
+        $("#convoDialog").dialog({
+
+            autoOpen: false,
+            modal: true,
+            show: {
+                effect: "blind",
+                duration: 500
+            },
+            hide: {
+                effect: "drop",
+                duration: 500
             }
         });
     });

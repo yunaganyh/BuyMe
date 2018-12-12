@@ -38,7 +38,7 @@
     <nav class="navbar navbar-light bg-light">
        <form class="form-inline" id="login" method="POST" action="{{url_for('login')}}">
             <input id="login_username" placeholder="username" name="login_username">
-            <input id="login_password" placeholder="password" name="login_password">
+            <input type="password" id="login_password" placeholder="password" name="login_password">
             <button  class="btn btn-outline-success my-2 my-sm-0" id="loginbutton" type="submit" name="submit" value="login" aria-label="Login"> Log In </button> 
     </form>
     </nav>
@@ -187,11 +187,11 @@ $(document).ready(function () {
             modal: true,
             show: {
                 effect: "blind",
-                duration: 1000
+                duration: 500
             },
             hide: {
-                effect: "explode",
-                duration: 1000
+                effect: "drop",
+                duration: 500
             }
         });
     });

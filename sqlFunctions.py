@@ -152,20 +152,36 @@ def insertMessage(conn, sender, receiver, iid, message):
 
 def retrieveItemsToSellMessageForUser(conn,uid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select distinct messages.receiver, messages.sender, 
-                    messages.iid, items.description, user.name, user.username, user.uid 
-                    from messages inner join items on messages.iid = items.iid
-                    inner join user on user.uid = messages.sender
-                    where receiver = %s''',[uid])
+    curs.execute('''select username, name, user.uid, 
+                    B.message, B.sender,B.receiver,B.iid,items.description
+                    from user inner join 
+                    (select message, sender, receiver, messages.iid as iid from messages 
+                    inner join posts on posts.iid=messages.iid 
+                    where (posts.uid != sender and posts.sold='false') 
+                    group by messages.iid, messages.sender) 
+                    as B on user.uid = B.sender inner join items on items.iid = B.iid 
+                    where B.receiver=%s''',[uid])
     return curs.fetchall()
     
 def retrieveItemsToBuyMessageForUser(conn,uid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select distinct messages.receiver, messages.sender, 
-                    messages.iid, items.description, user.name, user.username, user.uid
-                    from messages inner join items on messages.iid = items.iid
-                    inner join user on user.uid = messages.receiver 
-                    where sender = %s''',[uid])
+    curs.execute('''select username, name, user.uid, B.message, B.sender,
+                    B.receiver,B.iid, items.description 
+                    from user inner join 
+                    (select message, sender, receiver, messages.iid as iid from messages 
+                    inner join posts on posts.iid=messages.iid 
+                    where (posts.uid != sender and posts.sold='false') 
+                    group by messages.iid, messages.receiver) 
+                    as B on user.uid = B.receiver inner join items on items.iid = B.iid 
+                    where B.sender=%s''',[uid])
+    return curs.fetchall()
+
+def retrieveMessages(conn, sender, receiver, iid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select sender, receiver, iid, message, messageSent,username,uid 
+                from messages inner join user on (uid=sender) where 
+                (((sender = %s and receiver = %s) or (sender=%s and receiver=%s)) and iid=%s)
+                order by messageSent asc''', [sender,receiver,receiver,sender,iid])
     return curs.fetchall()
     
 def markPostSold(conn, iid):
