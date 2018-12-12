@@ -90,6 +90,7 @@
 {% if isUser %}
 <h2>My conversations</h2>
 
+<div id="messages">
 <h3>Items I'm interested in</h3>
 <table id="itemsToBuyMessages">
   <tr>
@@ -98,7 +99,7 @@
     <th>Message</th>
   </tr>
   {% for message in itemsToBuyMessages %}
-  <tr>
+  <tr data-uid={{message.uid}} data-iid={{message.iid}}>
     <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
     <td class="item">{{message.description}}</td>
     <td><button class="openConvo" name="openConvo" type="submit">Open conversation</button></td>
@@ -118,7 +119,7 @@
     <th>Message</th>
   </tr>
   {% for message in itemsToSellMessages %}
-  <tr>
+  <tr data-uid={{message.uid}} data-iid={{message.iid}}>
     <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
     <td class="item">{{message.description}}</td>
     <td><button class="openConvo" name="openConvo" type="submit">Open conversation</button></td>
@@ -130,7 +131,7 @@
   {% endfor %}
 </table>
 {% endif %}
-
+</div>
 
 <div id="updateDialog" title="Update Details For Item">
   <form id="updateForm" method='POST'>
@@ -180,6 +181,9 @@
 <script type="text/javascript">
   /*global $*/
 
+$('#messages').on('click','.openConvo', function() {
+  
+})
 
 $('#myAvailablePosts').on('click','.update',function(){
     var postID = $(this).closest('tr').data('iid');
