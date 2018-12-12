@@ -328,19 +328,21 @@ def searchCategory(category):
     if request.method=="GET":
         cat=sqlFunctions.getItembyCategory(conn,category)
         if cat:
-            return render_template('search.html',cat=cat,category=category)
+            return render_template('search.html',posts=cat, category=category)
         else:
             flash("There are no posts in this category")
             return redirect(request.referrer)
-    
-@app.route('/stringSearch/', methods=['GET','POST'])
+"""gets the search term from the input and sends it as parameter to stringSearchword"""    
+@app.route('/stringSearch/', methods=['POST'])
 def stringSearch():
     conn=sqlFunctions.getConn('c9')
     if request.method=="POST":
         searchWord = request.form.get('searchterm')
         return redirect( url_for('stringSearchword', searchWord=searchWord))
-    
-@app.route('/stringSearch/<searchWord>', methods=['GET','POST'])
+        
+""" renders results of s"""  
+@app.route('/stringSearch/', defaults={'searchWord':""} )   
+@app.route('/stringSearch/<searchWord>')
 def  stringSearchword(searchWord):
     conn=sqlFunctions.getConn('c9')
     results=sqlFunctions.partialDescription(conn,searchWord)
