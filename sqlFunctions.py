@@ -69,7 +69,7 @@ def getUserPassword(conn, username):
 def insertNewItem(conn, item):
     """Insert item into items table"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    # print item['photo']
+    print item['photo']
     curs.execute('''insert into items (description, price,category, other, photo, role) values 
                     (%s,%s,%s,%s, %s,%s)''', 
                     [item['description'], item['price'], item['category'],
@@ -140,11 +140,6 @@ def updatePostPhoto(conn, photo, iid):
     """Update posts with new photo"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''update items set photo = %s where iid=%s''',[photo,iid])
-    
-def updatePostEmptyPhoto(conn,iid):
-    """Update posts with null value if no photo selected"""
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''update items set photo = NULL where iid=%s''',[iid])
     
 #insert message into message table
 def insertMessage(conn, sender, receiver, iid, message):
