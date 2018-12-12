@@ -163,7 +163,7 @@ def logout():
 def getSalePosts():
     conn = sqlFunctions.getConn('c9')
     # retrieves the posts from the database
-    saleposts=sqlFunctions.getAvailableItemsAndUsers(conn)
+    saleposts=sqlFunctions.getItemsForSale(conn,"seller")
     print saleposts
     currentUser = ''
     if 'username' in session:
@@ -368,6 +368,19 @@ def retrieveMessages():
     else:
         flash('User not logged in')
         return redirect(url_for('home'))
+        
+
+""""renders all the posts with items for buy (items users are looking for) to html template"""
+@app.route('/buy/', methods=['POST', 'GET'])
+def getBuyPosts():
+    conn = sqlFunctions.getConn('c9')
+    # retrieves the posts from the database
+    buyposts=sqlFunctions.getItemsForSale(conn,"buyer")
+    print buyposts
+    currentUser = ''
+    if 'username' in session:
+        currentUser = session['username']
+    return render_template('forsale.html', posts=buyposts, currentUser = currentUser)
         
 if __name__ == '__main__':
     app.debug = True
