@@ -183,11 +183,7 @@ def blob(iid):
                             where iid = %s''', [iid])
     row = curs.fetchone()
     photo = row['photo']
-    #below does not work but attempts to specify a default image
-    #if there is no image uploaded by the user
-    #specifies a filepath for the img src the return will pass into
-    #realized raw image data might need to be read instead of a filepath
-    #but uncertain how to do that -- deleted noPic.png for now
+    #specifies a default image if there is no image uploaded by the user
     if photo is None:
         return send_from_directory('static','noPic.png')
     return Response(photo, mimetype='photo/'+imghdr.what(None,photo))
@@ -213,9 +209,6 @@ def uploadPost():
             itemDict = {}
             #first check is a picture is uploaded before formatting it
             if 'pic' not in request.files:
-                #specify as empty blob so when checking the database 
-                #later a known value can be checked and 
-                #this known value can be anticipated in conditionals
                 photo = None
                 itemDict = {'description': description, 'price': price,
                 'category': category, 'other': other, 'photo': photo, 'role': role}
