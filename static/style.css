@@ -3,3 +3,8 @@ img {
   max-width: 250px;
   height: auto;
 }
+
+#messageBody,
+#reply {
+    width: 250px;
+}
