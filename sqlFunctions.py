@@ -89,8 +89,7 @@ def getItemsForSale(conn, role):
     curs.execute('''select items.iid, items.description,items.price,
                     items.category,items.other,items.role, posts.*,user.username, user.name,user.dorm 
                     from items inner join posts on items.iid=posts.iid 
-                    inner join user on user.uid=posts.uid where items.role=%s
-                    order by items.uploaded desc''',[role])
+                    inner join user on user.uid=posts.uid where items.role=%s''',[role])
     return curs.fetchall()
 
 def getItemByID(conn, iid):
@@ -174,8 +173,7 @@ def retrieveItemsToBuyMessageForUser(conn,uid):
                     where (posts.uid != sender and posts.sold='false') 
                     group by messages.iid, messages.receiver) 
                     as B on user.uid = B.receiver inner join items on items.iid = B.iid 
-                    where B.sender=%s
-                    order by items.uploaded desc''',[uid])
+                    where B.sender=%s''',[uid])
     return curs.fetchall()
 
 def retrieveMessages(conn, sender, receiver, iid):
