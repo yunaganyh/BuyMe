@@ -89,7 +89,8 @@ def getItemsForSale(conn, role):
     curs.execute('''select items.iid, items.description,items.price,
                     items.category,items.other,items.role, posts.*,user.username, user.name,user.dorm 
                     from items inner join posts on items.iid=posts.iid 
-                    inner join user on user.uid=posts.uid where items.role=%s''',[role])
+                    inner join user on user.uid=posts.uid where items.role=%s
+                    order by items.uploaded desc''',[role])
     return curs.fetchall()
 
 def getItemByID(conn, iid):
@@ -173,7 +174,8 @@ def retrieveItemsToBuyMessageForUser(conn,uid):
                     where (posts.uid != sender and posts.sold='false') 
                     group by messages.iid, messages.receiver) 
                     as B on user.uid = B.receiver inner join items on items.iid = B.iid 
-                    where B.sender=%s''',[uid])
+                    where B.sender=%s
+                    order by items.uploaded desc''',[uid])
     return curs.fetchall()
 
 def retrieveMessages(conn, sender, receiver, iid):
@@ -194,7 +196,8 @@ def getMessageInfo(conn, uid, iid):
 def getItembyCategory(conn,category):
     """Gets items based on specified category"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select items.description, items.iid, posts.*,user.name,user.dorm from items inner 
+    curs.execute('''select items.description, items.iid,
+    items.price, items.category, items.other, posts.*,user.name,user.dorm from items inner 
     join posts on items.iid=posts.iid inner join user on user.uid=posts.uid where (category=%s and posts.sold=true)''',[category])
     return curs.fetchall()
     

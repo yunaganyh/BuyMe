@@ -167,8 +167,6 @@ def getSalePosts():
     conn = sqlFunctions.getConn('c9')
     # retrieves the posts from the database
     saleposts=sqlFunctions.getItemsForSale(conn,"seller")
-    print saleposts
-
     currentUser = ''
     if 'username' in session:
         currentUser = session['username']
@@ -244,7 +242,6 @@ def retrievePost():
     conn = sqlFunctions.getConn('c9')
     iid = request.form['iid']
     item = sqlFunctions.getItemByID(conn, iid)
-    print item
     return jsonify(item)
     
 @app.route('/updatePost/', methods=['POST'])
@@ -253,7 +250,6 @@ def updatePost():
     Takes inputs from the update posts form, updates the items,
     and returns the item JSON formatted"""
     conn = sqlFunctions.getConn('c9')
-    print request.form
     iid = request.form['iid']
     if 'description' in request.form:
         sqlFunctions.updatePostDescription(conn, request.form['description'],iid)
@@ -261,8 +257,11 @@ def updatePost():
         sqlFunctions.updatePostPrice(conn, request.form['price'],iid)
     if 'category' in request.form:
         sqlFunctions.updatePostCategory(conn, request.form['category'], iid)
-    if 'otherDesc' in request.form:
-        sqlFunctions.updatePostOther(conn, request.form['otherDesc'], iid)
+        if request.form['category'] != 'other':
+            sqlFunctions.updatePostOther(conn, '', iid)
+        else:
+            if 'otherDesc' in request.form:
+                sqlFunctions.updatePostOther(conn, request.form['otherDesc'], iid)
     return jsonify(sqlFunctions.getItemByID(conn,iid))
  
 @app.route('/deletePost/', methods=['POST'])
@@ -355,7 +354,6 @@ def getBuyPosts():
     conn = sqlFunctions.getConn('c9')
     # retrieves the posts from the database
     buyposts=sqlFunctions.getItemsForSale(conn,"buyer")
-    print buyposts
     currentUser = ''
     if 'username' in session:
         currentUser = session['username']
