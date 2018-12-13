@@ -238,10 +238,12 @@ $('#myAvailablePosts').on('click','.markSold',function(){
 
 $('#updateButton').click(function(){
   var iid = $('#updateDialog').data('iid');
-  var description = sanitize(('#description').val());
+  var description = sanitize($('#description').val());
   var price = sanitize($('#price').val());
   var category = $("input[name=category]:checked").val();
+  console.log(category);
   var otherDesc = sanitize($('#otherDesc').val());
+  console.log(otherDesc);
   $.post("{{url_for('updatePost')}}",
             {'description':description, 'price': price,'category':category,
             'otherDesc':otherDesc,'iid':iid}, 
@@ -270,7 +272,6 @@ function fillConvoDialog(obj) {
 function markPostAsSold(obj) {
   var row =  $("[data-iid='" + obj + "']").closest("tr");
   $('#mySoldPosts').append(row);
-  
 }
 
 function deletePostRow(obj) {
@@ -289,8 +290,8 @@ function updatePostInfo(obj) {
   if (obj['category']){
     post.find('.category').text(obj['category']);
   }
-  if (obj['other']){
-    post.find('.otherDesc').text(obj['other']);
+  if (obj['otherDesc']){
+    post.find('.otherDesc').text(obj['otherDesc']);
   }
 }
 
@@ -300,7 +301,12 @@ function fillDialogForm(obj){
   $('#updateDialog #itemTitle').text('Update item ' + obj['iid']);
   $('#updateDialog #description').val(obj['description']);
   $('#updateDialog #price').val(obj['price']);
-  $("#" + obj['category']).prop("checked", true);
+  $('#updateDialog #otherDesc').val(obj['other']);
+  if (obj['category'] == '') {
+    $("#updateDialog #other").prop("checked", true);
+  } else {
+    $("#updateDialog #" + obj['category']).prop("checked", true);
+  }
 }
 
 function closeConvo(obj){

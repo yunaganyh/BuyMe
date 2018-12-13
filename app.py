@@ -244,6 +244,7 @@ def retrievePost():
     conn = sqlFunctions.getConn('c9')
     iid = request.form['iid']
     item = sqlFunctions.getItemByID(conn, iid)
+    print item
     return jsonify(item)
     
 @app.route('/updatePost/', methods=['POST'])
@@ -252,20 +253,17 @@ def updatePost():
     Takes inputs from the update posts form, updates the items,
     and returns the item JSON formatted"""
     conn = sqlFunctions.getConn('c9')
-    try:
-        iid = request.form['iid']
-        if 'description' in request.form:
-            sqlFunctions.updatePostDescription(conn, request.form['description'],iid)
-        if 'price' in request.form:
-            sqlFunctions.updatePostPrice(conn, request.form['price'],iid)
-        if 'category' in request.form:
-            sqlFunctions.updatePostCategory(conn, request.form['category'], iid)
-        if 'other' in request.form:
-            sqlFunctions.updatePostOther(conn, request.form['other'], iid)
-        return jsonify(sqlFunctions.getItemByID(conn,iid))
-    except:
-        flash('Invalid item')
-    return jsonify({})
+    print request.form
+    iid = request.form['iid']
+    if 'description' in request.form:
+        sqlFunctions.updatePostDescription(conn, request.form['description'],iid)
+    if 'price' in request.form:
+        sqlFunctions.updatePostPrice(conn, request.form['price'],iid)
+    if 'category' in request.form:
+        sqlFunctions.updatePostCategory(conn, request.form['category'], iid)
+    if 'otherDesc' in request.form:
+        sqlFunctions.updatePostOther(conn, request.form['otherDesc'], iid)
+    return jsonify(sqlFunctions.getItemByID(conn,iid))
  
 @app.route('/deletePost/', methods=['POST'])
 def deletePost():  
@@ -287,7 +285,6 @@ def markPostSold():
 def messageUser():
     """Send a message to a user about the post in the table."""
     conn = sqlFunctions.getConn('c9')
-    print request.form
     messageID = None
     if 'user' in session:
         user = session['user']
@@ -302,9 +299,6 @@ def getUserItemInfo():
     conn = sqlFunctions.getConn('c9')
     user = sqlFunctions.getUser(conn,request.form['uid'])
     item = sqlFunctions.getItemByID(conn,request.form['iid'])
-    print 'HELLO'
-    print user
-    print item
     return jsonify({'uid':user['uid'],'username':user['username'],
                     'iid':item['iid'],'description':item['description']})
                     
