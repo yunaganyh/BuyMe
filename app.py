@@ -188,11 +188,10 @@ def blob(iid):
     #specifies a filepath for the img src the return will pass into
     #realized raw image data might need to be read instead of a filepath
     #but uncertain how to do that -- deleted noPic.png for now
-    if photo == "EMPTY_BLOB()":
-        photo = os.path.join('../static', 'noPic.png')
-        return Response(photo, mimetype='photo/png')
+    if photo is None:
+        return send_from_directory('static','noPic.png')
     return Response(photo, mimetype='photo/'+imghdr.what(None,photo))
-
+    
 @app.route('/upload/', methods=['GET','POST'])
 def uploadPost():
     """Handles the upload form submission
@@ -217,7 +216,7 @@ def uploadPost():
                 #specify as empty blob so when checking the database 
                 #later a known value can be checked and 
                 #this known value can be anticipated in conditionals
-                photo = "EMPTY_BLOB()"
+                photo = None
                 itemDict = {'description': description, 'price': price,
                 'category': category, 'other': other, 'photo': photo, 'role': role}
             else :
