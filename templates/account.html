@@ -4,6 +4,7 @@
     <meta charset='utf-8'>
     <meta name=author content="">
     <title>Registration</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel='stylesheet' href="{{url_for('static', filename = 'style.css')}}">
 </head>
 <body>
@@ -12,14 +13,16 @@
         <button id="homebutton" type="submit" name="submit" value="home"> Go to home page </button> 
 </form>
 <h2>User Information</h2>
-<table id="user">
+
+<table class="table table-hover" id="user">
+  <thead class="thead-light">
   <tr>
     <th>Username</th>
     <th>Name</th>
     <th>Graduation Year</th>
     <th>Dorm location</th>
     <th>Email</th>
-  </tr>
+  </tr></thead>
   <tr>
     <td>{{person.username}}</td>
     <td>{{person.name}}</td>
@@ -30,14 +33,15 @@
 </table>
 
 <h2>Available Posts</h2>
-<table id="myAvailablePosts">
+<table class="table table-hover" id="myAvailablePosts">
+  <thead class="thead-light">
   <tr>
     <th>Description</th>
     <th>Price</th>
     <th>Category</th>
     <th>Other</th>
     <th>Photo</th>
-  </tr>
+  </tr></thead>
   {% for post in availablePosts %}
   <tr class="post" data-iid="{{post.iid}}">
     <td class="description">{{post.description}}</td>
@@ -67,14 +71,15 @@
 </table>
 
 <h2>Sold Posts</h2>
-<table id="mySoldPosts">
+<table class="table table-hover" id="mySoldPosts">
+    <thead class="thead-light">
   <tr>
     <th>Description</th>
     <th>Price</th>
     <th>Category</th>
     <th>Other</th>
     <th>Photo</th>
-  </tr>
+  </tr></thead>
   {% for post in soldPosts %}
   <tr class="post" data-iid="{{post.iid}}">
     <td class="description">{{post.description}}</td>
@@ -92,19 +97,20 @@
 
 <div id="messages">
 <h3>Items I'm interested in</h3>
-<table id="itemsToBuyMessages">
+<table class="table table-hover" id="itemsToBuyMessages">
+  <thead class="thead-light">
   <tr>
     <th>Conversation with</th>
     <th>Item</th>
     <th>Message</th>
-  </tr>
+  </tr></thead>
   {% for message in itemsToBuyMessages %}
   <tr data-uid={{message.uid}} data-iid={{message.iid}}>
     <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
     <td class="item">{{message.description}}</td>
     <td><button class="openConvo" name="senderIsUser" type="submit">Open conversation</button></td>
     <td>
-      <form method="post">
+      <form method="post" action="">
         </form>
     </td>
   </tr>
@@ -112,19 +118,21 @@
 </table>
 
 <h3>Items I'm selling</h3>
-<table id="itemsToSellMessages">
+
+<table class="table table-hover" id="itemsToSellMessages">
+  <thead class="thead-light">
   <tr>
     <th>Conversation with</th>
     <th>Item</th>
     <th>Message</th>
-  </tr>
+  </tr></thead>
   {% for message in itemsToSellMessages %}
   <tr data-uid={{message.uid}} data-iid={{message.iid}}>
     <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
     <td class="item">{{message.description}}</td>
     <td><button class="openConvo" name="senderNotUser" type="submit">Open conversation</button></td>
     <td>
-      <form method="post">
+      <form method="post" action="">
         </form>
     </td>
   </tr>
@@ -138,7 +146,7 @@
         <h2 id="itemTitle"> Update Item </h2>
         <input type="hidden" name="iid" id="iid" value="">
         <p><label>Description <br><textarea id="description" rows="4" cols="50" maxlength="100" name="description"></textarea></label></p>
-        <p><label>Price $ <br><input id="price" type="number" step="0.01" pattern="^\d*(\.\d{0,2})?$" name="price"></label></p>
+        <p><label>Price $ <br><input id="price" type="text" name="price"></label></p>
         <p><label>Category</label> <br>
              <label for="food">Food</label>
             <input type="radio" name="category" value="food"><br>
@@ -188,22 +196,9 @@
 
 <script type="text/javascript">
   /*global $*/
-  
-function sanitize(string) {
-  const map = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;',
-      "/": '&#x2F;',
-  };
-  const reg = /[&<>"'/]/ig;
-  return string.replace(reg, (match)=>(map[match]));
-}
 
 $('#replyButton').click(function(){
-  var reply = sanitize($('#reply').val());
+  var reply = $('#reply').val();
   var sender = $('#convoDialog #messageSender').val();
   var iid = $('#convoDialog #messageIID').val();
   $.post("{{url_for('messageUser')}}",
@@ -238,10 +233,10 @@ $('#myAvailablePosts').on('click','.markSold',function(){
 
 $('#updateButton').click(function(){
   var iid = $('#updateDialog').data('iid');
-  var description = sanitize(('#description').val());
-  var price = sanitize($('#price').val());
+  var description = $('#description').val();
+  var price = $('#price').val();
   var category = $("input[name=category]:checked").val();
-  var otherDesc = sanitize($('#otherDesc').val());
+  var otherDesc = $('#otherDesc').val();
   $.post("{{url_for('updatePost')}}",
             {'description':description, 'price': price,'category':category,
             'otherDesc':otherDesc,'iid':iid}, 
