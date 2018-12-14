@@ -82,7 +82,7 @@
 {% endblock %}
 
  {% block content %}
-            <form method="post" action="{{url_for('search')}}">
+            <form method="post" action="{{url_for('getSalePosts')}}">
                 <label for="menu-category">Search from Categories:</label> 
                 <select required name="menu-category">
                     <option value="none">Choose One</option>
@@ -95,8 +95,8 @@
             </form>
 {% endblock %}
 
+{% block head %} <h1>Items for Sale</h1> {% endblock %}
 {% block sale %}
-    <h1>Items for Sale</h1>
 
     <div class="table responsive" id="sposts">
 

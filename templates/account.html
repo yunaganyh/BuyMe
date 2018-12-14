@@ -284,6 +284,7 @@ function deletePostRow(obj) {
 }
 
 function updatePostInfo(obj) {
+  console.log(obj);
   var iid = obj['iid'];
   var post = $("[data-iid='" + iid + "']");
   post.closest('tr').find('.description').val(obj['description']);

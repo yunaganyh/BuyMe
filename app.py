@@ -161,17 +161,6 @@ def logout():
         flash('some kind of error '+str(err))
         return redirect(request.referrer)
 
-# renders all the posts with items for sale to html template
-@app.route('/sale/')
-def getSalePosts():
-    conn = sqlFunctions.getConn('c9')
-    # retrieves the posts from the database
-    saleposts=sqlFunctions.getItemsForSale(conn,"seller")
-    currentUser = ''
-    if 'username' in session:
-        currentUser = session['username']
-    return render_template('forsale.html', posts=saleposts, currentUser = currentUser)
-
 #returns images to display on items for sale
 @app.route('/blob/<iid>')
 def blob(iid):
@@ -300,21 +289,44 @@ def getUserItemInfo():
     item = sqlFunctions.getItemByID(conn,request.form['iid'])
     return jsonify({'uid':user['uid'],'username':user['username'],
                     'iid':item['iid'],'description':item['description']})
-                    
+
 @app.route('/sale/', defaults ={'category':''}, methods=['GET','POST'])
 @app.route('/sale/<category>', methods=['GET','POST'])
-def search(category):
+def getSalePosts(category):
     conn = sqlFunctions.getConn('c9')
     if request.method=="POST":
         category=request.form.get('menu-category')
-        return redirect(url_for('search',category=category))
-    cat=sqlFunctions.getItembyCategory(conn,category)
-    if cat:
-        return render_template('search.html',posts=cat,category=category)
-    else:
-        flash("There are no posts in this category")
-        return redirect(url_for('getSalePosts'))
+        return redirect(url_for('getSalePosts',category=category))
+    currentUser = ''
+    if 'username' in session:
+        currentUser = session['username']
+    if category:
+        cat=sqlFunctions.getItemByCategoryRole(conn,category,'seller')
+        if cat:
+            return render_template('search.html',
+                                    posts=cat,category=category, 
+                                    currentUser = currentUser)
+        else:
+            flash("There are no posts in this category")
+    posts = sqlFunctions.getItemsForSale(conn,"seller")
+    return render_template('search.html',
+                            posts=posts,category='', 
+                            currentUser = currentUser)
 
+
+@app.route('/buy/', methods=['POST', 'GET'])
+def getBuyPosts():
+    """"renders all the posts with items for buy 
+    (items users are looking for) to html template"""
+    conn = sqlFunctions.getConn('c9')
+    # retrieves the posts from the database
+    buyposts=sqlFunctions.getItemsForSale(conn,"buyer")
+    print buyposts
+    currentUser = ''
+    if 'username' in session:
+        currentUser = session['username']
+    return render_template('forsale.html', posts=buyposts, currentUser = currentUser)
+  
 @app.route('/stringSearch/', defaults={'searchWord':''}, methods=['GET','POST'])   
 @app.route('/stringSearch/<searchWord>', methods=['GET','POST'])
 def stringSearch(searchWord):
@@ -346,19 +358,7 @@ def retrieveMessages():
     else:
         flash('User not logged in')
         return redirect(url_for('home'))
-        
 
-""""renders all the posts with items for buy (items users are looking for) to html template"""
-@app.route('/buy/', methods=['POST', 'GET'])
-def getBuyPosts():
-    conn = sqlFunctions.getConn('c9')
-    # retrieves the posts from the database
-    buyposts=sqlFunctions.getItemsForSale(conn,"buyer")
-    currentUser = ''
-    if 'username' in session:
-        currentUser = session['username']
-    return render_template('forsale.html', posts=buyposts, currentUser = currentUser)
-        
 if __name__ == '__main__':
     app.debug = True
     app.run('0.0.0.0',8080)

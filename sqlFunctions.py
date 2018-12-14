@@ -31,7 +31,8 @@ def getUserPosts(conn,uid, sold):
     curs.execute('''select items.description, items.price, items.category,
                     items.other, items.photo, items.iid 
                     from items inner join posts on items.iid=posts.iid 
-                    where (posts.uid=%s and posts.sold=%s)''',[uid, sold])
+                    where (posts.uid=%s and posts.sold=%s) 
+                    order by items.uploaded desc''',[uid, sold])
     return curs.fetchall()
     
 def getUser(conn, uid):
@@ -89,7 +90,8 @@ def getItemsForSale(conn, role):
     curs.execute('''select items.iid, items.description,items.price,
                     items.category,items.other,items.role, posts.*,user.username, user.name,user.dorm 
                     from items inner join posts on items.iid=posts.iid 
-                    inner join user on user.uid=posts.uid where items.role=%s''',[role])
+                    inner join user on user.uid=posts.uid where items.role=%s
+                    order by items.uploaded desc''',[role])
     return curs.fetchall()
 
 def getItemByID(conn, iid):
@@ -191,12 +193,16 @@ def markPostSold(conn, iid):
 def getMessageInfo(conn, uid, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
 
-def getItembyCategory(conn,category):
+def getItemByCategoryRole(conn,category, role):
     """Gets items based on specified category"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select items.description, items.iid,
-    items.price, items.category, items.other, posts.*,user.name,user.dorm from items inner 
-    join posts on items.iid=posts.iid inner join user on user.uid=posts.uid where (category=%s and posts.sold=true)''',[category])
+    curs.execute('''select items.description, items.price, items.iid, 
+                items.category, items.other, posts.*,user.name, user.username
+                from items inner join posts on items.iid=posts.iid 
+                inner join user on user.uid=posts.uid 
+                where (category=%s and posts.sold=true and items.role = %s)
+                order by items.uploaded desc''',
+                [category, role])
     return curs.fetchall()
     
 def partialDescription(conn,keyword):
