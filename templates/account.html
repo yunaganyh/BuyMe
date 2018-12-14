@@ -16,6 +16,7 @@
 
 <table class="table table-hover" id="user">
   <thead class="thead-light">
+
   <tr>
     <th>Username</th>
     <th>Name</th>
@@ -42,6 +43,7 @@
     <th>Other</th>
     <th>Photo</th>
   </tr></thead>
+  
   {% for post in availablePosts %}
   <tr class="post" data-iid="{{post.iid}}">
     <td class="description">{{post.description}}</td>
@@ -72,7 +74,7 @@
 
 <h2>Sold Posts</h2>
 <table class="table table-hover" id="mySoldPosts">
-    <thead class="thead-light">
+  <thead class="thead-light">
   <tr>
     <th>Description</th>
     <th>Price</th>
@@ -118,7 +120,6 @@
 </table>
 
 <h3>Items I'm selling</h3>
-
 <table class="table table-hover" id="itemsToSellMessages">
   <thead class="thead-light">
   <tr>
@@ -197,6 +198,19 @@
 <script type="text/javascript">
   /*global $*/
 
+function sanitize(string) {
+  const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      "/": '&#x2F;',
+  };
+  const reg = /[&<>"'/]/ig;
+  return string.replace(reg, (match)=>(map[match]));
+}
+
 $('#replyButton').click(function(){
   var reply = $('#reply').val();
   var sender = $('#convoDialog #messageSender').val();
@@ -234,7 +248,7 @@ $('#myAvailablePosts').on('click','.markSold',function(){
 $('#updateButton').click(function(){
   var iid = $('#updateDialog').data('iid');
   var description = sanitize($('#description').val());
-  var price = sanitize($('#price').val());
+  var price = $('#price').val();
   var category = $("input[name=category]:checked").val();
   var otherDesc = sanitize($('#otherDesc').val());
   $.post("{{url_for('updatePost')}}",
@@ -272,20 +286,13 @@ function deletePostRow(obj) {
 }
 
 function updatePostInfo(obj) {
+  console.log(obj);
   var iid = obj['iid'];
   var post = $("[data-iid='" + iid + "']");
-  if (obj['description']) {
-    post.find('.description').text(obj['description']);
-  }
-  if (obj['price']){
-    post.find('.price').text(obj['price']);
-  }
-  if (obj['category']){
-    post.find('.category').text(obj['category']);
-  }
-  if (obj['otherDesc']){
-    post.find('.otherDesc').text(obj['otherDesc']);
-  }
+  post.closest('tr').find('.description').val(obj['description']);
+  post.closest('tr').find('.price').val(obj['price']);
+  post.closest('tr').find('.category').val(obj['category']);
+  post.closest('tr').find('.other').val(obj['other']);
 }
 
 function fillDialogForm(obj){

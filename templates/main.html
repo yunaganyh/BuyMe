@@ -82,8 +82,20 @@
 {% endblock %}
 
  {% block content %}
-            <form method="post" action="{{url_for('search')}}">
-                <label for="menu-category">Search from Categories:</label> 
+            <form method="post" action="{{url_for('getSalePosts')}}">
+                <label for="menu-category">Search from Categories (items for sale):</label> 
+                <select required name="menu-category">
+                    <option value="none">Choose One</option>
+                    {% for category in ['food','clothing','shoes','services','utility',
+            'makeup','textbooks','bath-body','event','other'] %}
+                        <option value={{category}}>{{category}}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" name="submit" value="Choose" method="POST"/>
+            </form>
+            <br>
+            <form method="post" action="{{url_for('getBuyPosts')}}">
+                <label for="menu-category">Search from Categories (items requested):</label> 
                 <select required name="menu-category">
                     <option value="none">Choose One</option>
                     {% for category in ['food','clothing','shoes','services','utility',
@@ -95,8 +107,8 @@
             </form>
 {% endblock %}
 
+{% block head %} <h1>Items for Sale</h1> {% endblock %}
 {% block sale %}
-    <h1>Items for Sale</h1>
 
     <div class="table responsive" id="sposts">
 

@@ -1,10 +1,10 @@
 img {
     width: 250px;
-  max-width: 250px;
-  height: auto;
+    max-width: 250px;
+    height: auto;
 }
 
 #messageBody,
 #reply {
-    width: 250px;
+    width: 600px;
 }
