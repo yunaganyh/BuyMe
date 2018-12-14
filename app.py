@@ -304,7 +304,7 @@ def getSalePosts(category):
         cat=sqlFunctions.getItemByCategoryRole(conn,category,'seller')
         if cat:
             return render_template('search.html',
-                                    posts=cat,category=category, 
+                                    posts=cat,category=category + ' (for sale)', 
                                     currentUser = currentUser)
         else:
             flash("There are no posts in this category")
@@ -313,19 +313,31 @@ def getSalePosts(category):
                             posts=posts,category='', 
                             currentUser = currentUser)
 
-
-@app.route('/buy/', methods=['POST', 'GET'])
-def getBuyPosts():
+@app.route('/buy/', defaults ={'category':''}, methods=['GET','POST'])
+@app.route('/buy/<category>', methods=['GET','POST'])
+def getBuyPosts(category):
     """"renders all the posts with items for buy 
     (items users are looking for) to html template"""
     conn = sqlFunctions.getConn('c9')
-    # retrieves the posts from the database
-    buyposts=sqlFunctions.getItemsForSale(conn,"buyer")
-    print buyposts
+    if request.method=="POST":
+        category=request.form.get('menu-category')
+        return redirect(url_for('getBuyPosts',category=category))
     currentUser = ''
+    # retrieves the posts from the database
     if 'username' in session:
         currentUser = session['username']
-    return render_template('forsale.html', posts=buyposts, currentUser = currentUser)
+    if category:
+        buyposts=sqlFunctions.getItemByCategoryRole(conn,category,'buyer')
+        if buyposts:
+            return render_template('search.html',
+                                    posts=buyposts,category=category + ' (requested)', 
+                                    currentUser = currentUser)
+        else:
+            flash("There are no posts in this category")
+    posts = sqlFunctions.getItemsForSale(conn,"buyer")
+    return render_template('search.html',
+                            posts=posts,category='Items Requested', 
+                            currentUser = currentUser)
   
 @app.route('/stringSearch/', defaults={'searchWord':''}, methods=['GET','POST'])   
 @app.route('/stringSearch/<searchWord>', methods=['GET','POST'])

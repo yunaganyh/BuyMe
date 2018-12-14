@@ -162,7 +162,7 @@ def retrieveItemsToSellMessageForUser(conn,uid):
                     where (posts.uid != sender and posts.sold='false') 
                     group by messages.iid, messages.sender) 
                     as B on user.uid = B.sender inner join items on items.iid = B.iid 
-                    where B.receiver=%s''',[uid])
+                    where B.receiver=%s order by items.uploaded desc''',[uid])
     return curs.fetchall()
     
 def retrieveItemsToBuyMessageForUser(conn,uid):
@@ -175,7 +175,7 @@ def retrieveItemsToBuyMessageForUser(conn,uid):
                     where (posts.uid != sender and posts.sold='false') 
                     group by messages.iid, messages.receiver) 
                     as B on user.uid = B.receiver inner join items on items.iid = B.iid 
-                    where B.sender=%s''',[uid])
+                    where B.sender=%s order by items.uploaded desc''',[uid])
     return curs.fetchall()
 
 def retrieveMessages(conn, sender, receiver, iid):
@@ -189,9 +189,6 @@ def retrieveMessages(conn, sender, receiver, iid):
 def markPostSold(conn, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''update posts set sold = 'true' where iid = %s''',[iid])
-    
-def getMessageInfo(conn, uid, iid):
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
 
 def getItemByCategoryRole(conn,category, role):
     """Gets items based on specified category"""
@@ -210,7 +207,11 @@ def partialDescription(conn,keyword):
     curs = conn.cursor(MySQLdb.cursors.DictCursor) # SQL query from wmdb, to get id's movies
     word = "%" + keyword +"%"
     curs.execute('''select items.iid,items.description,items.price,items.category,
-                    items.other,items.role, posts.*,user.username,user.name from items inner join posts on items.iid=posts.iid inner join user on user.uid=posts.uid where (description like %s and posts.sold = true)''',[word])
+                    items.other,items.role, posts.*,user.username,user.name 
+                    from items inner join posts on items.iid=posts.iid 
+                    inner join user on user.uid=posts.uid 
+                    where (description like %s and posts.sold = true)
+                    order by items.uploaded desc''',[word])
     results= curs.fetchall()
     return results
 
