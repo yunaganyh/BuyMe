@@ -10,7 +10,6 @@
 {% endblock %}
             
 {% block buttons %}
-<h1>Welcome!</h1>
 <head>
     <meta charset='utf-8'>
     <meta name=author content="">
@@ -19,9 +18,14 @@
 </head>
 {% endblock %}
 
+{% block content %}
+
+{% endblock %}
+{% block head %}
+{% endblock %}
 {% block sale %}
 <form id="joinform" action="{{url_for('register')}}" method="post">
-    <h2>Join</h2>
+    <h1>Join</h1>
     <p><label><input type="text" name="username" required pattern="^\w+$"> Username</label></p>
     <p><label><input type="text" name="name"> Name</label></p>
     <p><label><select name="gradYear">
