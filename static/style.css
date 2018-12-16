@@ -4,7 +4,16 @@ img {
     height: auto;
 }
 
-#messageBody,
-#reply {
-    width: 600px;
+#messageBody, #reply {
+    width: 480px;
+    max-width: 480px;
+}
+
+#conversation td,th {
+    padding: 16px;
+    border-bottom: 1px solid #ddd;
+}
+
+#conversation .header {
+    background-color: #d3d3d3;
 }

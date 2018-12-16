@@ -134,11 +134,8 @@
                 <td class="category">{{post.category}}</td>
                 <td class="other">{{post.other}}</td>
                 <td class="photo"><img src="{{url_for('blob',iid=post.iid)}}"></td>
-                {% if currentUser != '' and currentUser != post.username %}
-                <td><button type="submit" class="messageUser">Message user</button></td>
-                <td><form method="post" name="message" action="{{url_for('messageUser')}}">
-                    <input type="hidden" name="message"></form>
-                </td>
+                {% if currentUser != None and currentUser != post.username %}
+                <td><button type="button" class="messageUser">Message user</button></td>
                 {% endif %}
             </tr>
         {% endfor %}
@@ -149,7 +146,7 @@
                 <input type="hidden" name="uid" id="uid" value="">
                 <input type="hidden" name="iid" id="iid" value="">
                 <p><label><textarea id="messageBody" rows="4" cols="50" maxlength="200" name="messageBody"></textarea></label></p>
-                <p><button type="submit" id="messageButton">Send Message</button></p>
+                <p><button type="button" id="messageButton">Send Message</button></p>
             </form>
         </div>
     </div>
@@ -163,7 +160,8 @@
 
 <script>
 /*global $*/
-  
+
+/* sanitize input strings from xss attacks by escaping special characters */
 function sanitize(string) {
   const map = {
       '&': '&amp;',
@@ -177,48 +175,72 @@ function sanitize(string) {
   return string.replace(reg, (match)=>(map[match]));
 }
 
+/*
+  Displays a textbox for user to enter in a message to send to another user
+  row's iid and uid info is retrieved and sent to the backend to determine
+  item info
+*/
 $('#posts-list').on('click','.messageUser',function(event){
     var postUID = $(this).closest('tr').data('uid');
     var postIID = $(this).closest('tr').data('iid');
-    console.log(postUID);
-    console.log(postIID);
     $.post("{{url_for('getUserItemInfo')}}",
         {'uid':postUID,'iid':postIID},
         fillDialogTitle)
     $("#messageUserDialog").dialog("open");
 })
 
+/*
+  Fills the dialog title with information about post's poster and post item 
+  description
+  Adds post uid and iid to the hidden inputs to be retrieved when the message is
+  sent
+*/
+function fillDialogTitle(obj) {
+    $('#uid').val(obj['uid']);
+    $('#iid').val(obj['iid']);
+    $("#messageUserDialog").dialog('option','title', 
+                                    'Message ' + obj['username'] + ' about '
+                                            + obj['description']);
+}
+
+/*
+  Executed when user wants to send the message.
+  Post's uid and iid are retrieved along with message (which is then sanitized)
+  and sent to the backend to insert message into the database.
+*/
 $('#messageButton').click(function(){
-  var uid = $('#messageUserDialog #uid').val();
-  var iid = $('#messageUserDialog #iid').val();
-  var description = sanitize($('#messageUserDialog #messageBody').val());
+  var uid = $('#uid').val();
+  var iid = $('#iid').val();
+  var description = sanitize($('#messageBody').val());
   $.post("{{url_for('messageUser')}}",
         {'uid':uid,'iid':iid,'description':description}, 
         alertMessageSent);
 })
 
+/*
+  Close the dialog and alert user if the message was successfully sent.
+  Otherwise, keep dialog open and alert otherwise.
+*/
 function alertMessageSent(obj) {
     if (obj['last_insert_id()']) {
+        $('#messageUserDialog').dialog('close');
         alert('Message sent successfully');
     } else {
         alert ('Message not sent. Please try again.')
     }
 }
 
-function fillDialogTitle(obj) {
-    $('#messageUserDialog #uid').val(obj['uid']);
-    $('#messageUserDialog #iid').val(obj['iid']);
-    $("#messageUserDialog").dialog('option','title', 
-                                    'Message ' + obj['username'] + ' about '
-                                            + obj['description']);
-}
-
+/* 
+  Hides the message dialog form when the page initially loads and set how they 
+  will show and hide.
+*/
 $(document).ready(function () {
     $(function () {
         $("#messageUserDialog").dialog({
 
             autoOpen: false,
             modal: true,
+            width: 600,
             show: {
                 effect: "blind",
                 duration: 500

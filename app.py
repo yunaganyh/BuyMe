@@ -29,9 +29,8 @@ def home():
     """Displays all available posts and actionable buttons."""
     conn = sqlFunctions.getConn('c9')
     posts = sqlFunctions.getAvailableItemsAndUsers(conn)
-    currentUser = ''
-    if 'username' in session:
-        currentUser = session['username']
+    currentUser = session.get('username')
+    print currentUser
     return render_template('main.html', posts = posts, currentUser = currentUser)
 
 @app.route('/register/', methods=['GET','POST'])
@@ -50,28 +49,22 @@ def register():
             if passwd1 != passwd2:
                 flash('passwords do not match')
                 return redirect(request.referrer)
-            #hash the password
-            hashed = bcrypt.hashpw(passwd1.encode('utf-8'), bcrypt.gensalt())
             #retrieve user from user table to see if user already exists 
             #return error if user exists
-            row = sqlFunctions.getUserByUsername(conn, username)
-            if row is not None:
+            try:
+                row = sqlFunctions.getUserByUsername(conn, username)
+            except:
                 flash('That username is taken')
                 return redirect( url_for('register') )
-            #retrieve user input info
-            name = request.form['name']
-            gradYear = request.form['gradYear']
-            email = request.form['email']
-            dorm = request.form['dorm']
+            #hash the password
+            hashed = bcrypt.hashpw(passwd1.encode('utf-8'), bcrypt.gensalt())
             #insert user into user table and password table
-            sqlFunctions.insertUser(conn,username,name,gradYear,dorm,email)
-            sqlFunctions.insertUserpass(conn,username,hashed)
+            sqlFunctions.insertUser(conn,request.form, hashed)
             user = sqlFunctions.getUserByUsername(conn, username)
             #create session for user
             session['username'] = username
             session['user'] = user
             session['logged_in'] = True
-            session['visits'] = 1
             session.permanent= True
             return redirect( url_for('account',usernameInput=username) )
         except Exception as err:
@@ -86,12 +79,8 @@ def account(usernameInput):
     messages and options to update, delete, and mark a post as sold is shown."""
     conn = sqlFunctions.getConn('c9')
     #check if user is in session
-    try: 
-        loggedIn = session['logged_in']
-    except:
-        loggedIn = None
-    #show account page if user logged in, redirect to home otherwise
-    if loggedIn:
+    if session.get('username'):
+        #show account page if user logged in, redirect to home otherwise
         username = session['username']
         #retrieve posts by user
         if usernameInput == '':
@@ -135,7 +124,6 @@ def login():
             session['user'] = user
             session['username'] = username
             session['logged_in'] = True
-            session['visits'] = 1
             session.permanent = True
             return redirect(request.referrer)
         else:
@@ -181,12 +169,12 @@ def uploadPost():
     Retrieves inputs from the form and creates a dictionary that will be passed into
     a function that extracts the different compenents to insert the item into the 
     Items table"""
-    conn = sqlFunctions.getConn('c9')
     test = True
     if request.method == 'GET':
         return render_template('form.html')
     else:
         try:
+            conn = sqlFunctions.getConn('c9')
             description = request.form.get('description')
             price = request.form.get('price')
             category = request.form.get('category')
@@ -220,14 +208,16 @@ def uploadPost():
                 iid = iid['last_insert_id()']
                 sqlFunctions.insertNewPost(conn,uid,iid) 
         except Exception as err:
-            # flash('form submission error '+str(err))
+            flash('form submission error '+str(err))
             flash('please fill out all entries')
             return render_template('form.html')
     return redirect(url_for('home'))
 
 @app.route('/retrievePost/', methods=['POST'])
 def retrievePost():
-    """Retrieves a post from the form and returns it in JSON format"""
+    """Retrieves a post from the form and returns it in JSON format for an ajax callback.
+    Executed when user clicks on a post in their account page to update it.
+    The item info is sent back to fill out the update post form."""
     conn = sqlFunctions.getConn('c9')
     iid = request.form['iid']
     item = sqlFunctions.getItemByID(conn, iid)
@@ -239,18 +229,17 @@ def updatePost():
     Takes inputs from the update posts form, updates the items,
     and returns the item JSON formatted"""
     conn = sqlFunctions.getConn('c9')
-    iid = request.form['iid']
-    if 'description' in request.form:
-        sqlFunctions.updatePostDescription(conn, request.form['description'],iid)
-    if 'price' in request.form:
-        sqlFunctions.updatePostPrice(conn, request.form['price'],iid)
-    if 'category' in request.form:
-        sqlFunctions.updatePostCategory(conn, request.form['category'], iid)
-        if request.form['category'] != 'other':
-            sqlFunctions.updatePostOther(conn, '', iid)
-        else:
-            if 'otherDesc' in request.form:
-                sqlFunctions.updatePostOther(conn, request.form['otherDesc'], iid)
+    try:
+        iid = request.form['iid']
+        description = request.form['description']
+        price = request.form['price']
+        category = request.form['category']
+        other = request.form['other']
+    except:
+        return {'Did not have all required fields.'}
+    if category != "other":
+        other = ''
+    sqlFunctions.updatePost(conn, description, price, category, other, iid)
     return jsonify(sqlFunctions.getItemByID(conn,iid))
  
 @app.route('/deletePost/', methods=['POST'])
@@ -273,7 +262,7 @@ def markPostSold():
 def messageUser():
     """Send a message to a user about the post in the table."""
     conn = sqlFunctions.getConn('c9')
-    messageID = None
+    messageID = 0
     if 'user' in session:
         user = session['user']
         messageID = sqlFunctions.insertMessage(
@@ -357,19 +346,14 @@ def stringSearch(searchWord):
 def retrieveMessages():
     """Retrieves messages between a sender and receiver about a unique item."""
     conn = sqlFunctions.getConn('c9')
-    try: 
-        loggedIn = session['logged_in']
-    except:
-        loggedIn = None
-    if loggedIn:
+    if session.get('user'):
         uid = session['user']['uid']
         convoHolder = request.form['uid']
         iid = request.form['iid']
         messages = sqlFunctions.retrieveMessages(conn, uid, convoHolder, iid)
         return jsonify({'messages':messages, 'sender':request.form['sender']})
     else:
-        flash('User not logged in')
-        return redirect(url_for('home'))
+        return jsonify('user not in session.')
 
 if __name__ == '__main__':
     app.debug = True

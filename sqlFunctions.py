@@ -42,17 +42,25 @@ def getUser(conn, uid):
     curs.execute('''select * from user where uid = %s''',[uid])
     return curs.fetchone()
 
-def insertUserpass(conn, username, hashed):
-    """Inserts password for user"""
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''INSERT into userpass(username,hashed) VALUES(%s,%s)''',
-                         [username, hashed])
+# def insertUserpass(conn, username, hashed):
+#     """Inserts password for user"""
+#     curs = conn.cursor(MySQLdb.cursors.DictCursor)
+#     curs.execute('''INSERT into userpass(username,hashed) VALUES(%s,%s)''',
+#                          [username, hashed])
 
-def insertUser(conn, username, name, gradYear, dorm, email):
+def insertUser(conn, obj, hashed):
     """Insert user into user table"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''insert into user(username,name,gradYear,dorm,email) values
-                (%s,%s,%s,%s,%s)''',[username,name,gradYear,dorm,email])
+                (%s,%s,%s,%s,%s)''',
+                [obj['username'],obj['name'],obj['gradYear'],obj['dorm'],obj['email']])
+    curs.execute('''INSERT into userpass(username,hashed) VALUES(%s,%s)''',
+                [obj['username'], hashed])
+
+def getLastInsert(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select last_insert_id()''')
+    return curs.fetchone()
 
 def getUserByUsername(conn, username):
     """Get user info from user table based
@@ -117,39 +125,20 @@ def deleteItem(conn, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''delete from items where iid = %s''', [iid])
 
-def updatePostDescription(conn, description,iid):
-    """Update posts with new description"""
+def updatePost(conn, description, price, category, other, iid):
+    """updates post with new values from update post form"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''update items set description = %s where iid=%s''',[description,iid])
-    
-def updatePostPrice(conn, price, iid):
-    """Update posts with new price"""
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''update items set price = %s where iid=%s''',[price, iid])
-    
-def updatePostCategory(conn, category, iid):
-    """Update posts with new category"""
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''update items set category = %s where iid=%s''',[category, iid])
+    curs.execute('''update items set description = %s, price = %s,
+                    category=%s, other=%s where iid=%s''',
+                    [description, price, category, other, iid])
 
-def updatePostOther(conn, other, iid):
-    """Update posts with new other description"""
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''update items set other = %s where iid=%s''',[other, iid])
-
-#update posts with new photo
-def updatePostPhoto(conn, photo, iid):
-    """Update posts with new photo"""
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''update items set photo = %s where iid=%s''',[photo,iid])
-    
 #insert message into message table
 def insertMessage(conn, sender, receiver, iid, message):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''insert into messages(sender,receiver, iid, message) 
                 values (%s,%s,%s, %s)''',
-                [sender,receiver, iid,message])
-    curs.execute('''select distinct last_insert_id() from messages''')
+                [sender,receiver,iid,message])
+    curs.execute('''select last_insert_id()''')
     return curs.fetchone()
 
 def retrieveItemsToSellMessageForUser(conn,uid):
@@ -159,10 +148,10 @@ def retrieveItemsToSellMessageForUser(conn,uid):
                     from user inner join 
                     (select message, sender, receiver, messages.iid as iid from messages 
                     inner join posts on posts.iid=messages.iid 
-                    where (posts.uid != sender and posts.sold='false') 
+                    where (posts.uid != sender and posts.sold='false' and receiver = %s) 
                     group by messages.iid, messages.sender) 
                     as B on user.uid = B.sender inner join items on items.iid = B.iid 
-                    where B.receiver=%s order by items.uploaded desc''',[uid])
+                    order by items.uploaded desc''',[uid])
     return curs.fetchall()
     
 def retrieveItemsToBuyMessageForUser(conn,uid):
@@ -172,17 +161,19 @@ def retrieveItemsToBuyMessageForUser(conn,uid):
                     from user inner join 
                     (select message, sender, receiver, messages.iid as iid from messages 
                     inner join posts on posts.iid=messages.iid 
-                    where (posts.uid != sender and posts.sold='false') 
+                    where (posts.uid != sender and posts.sold='false' and sender = %s) 
                     group by messages.iid, messages.receiver) 
                     as B on user.uid = B.receiver inner join items on items.iid = B.iid 
-                    where B.sender=%s order by items.uploaded desc''',[uid])
+                    order by items.uploaded desc''',[uid])
     return curs.fetchall()
 
 def retrieveMessages(conn, sender, receiver, iid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select sender, receiver, iid, message, messageSent,username,uid 
-                from messages inner join user on (uid=sender) where 
-                (((sender = %s and receiver = %s) or (sender=%s and receiver=%s)) and iid=%s)
+                from messages 
+                inner join user on (uid=sender) 
+                where (((sender = %s and receiver = %s) or (sender=%s and receiver=%s)) 
+                and iid=%s)
                 order by messageSent asc''', [sender,receiver,receiver,sender,iid])
     return curs.fetchall()
     
