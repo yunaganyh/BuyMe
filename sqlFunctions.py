@@ -57,11 +57,6 @@ def insertUser(conn, obj, hashed):
     curs.execute('''INSERT into userpass(username,hashed) VALUES(%s,%s)''',
                 [obj['username'], hashed])
 
-def getLastInsert(conn):
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select last_insert_id()''')
-    return curs.fetchone()
-
 def getUserByUsername(conn, username):
     """Get user info from user table based
     on user username"""
