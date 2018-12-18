@@ -56,7 +56,7 @@ def register():
                 hashed = bcrypt.hashpw(passwd1.encode('utf-8'), bcrypt.gensalt())
                 #insert user into user table and password table
                 sqlFunctions.insertUser(conn,request.form, hashed)
-            except:
+            except MySQLdb.IntegrityError:
                 flash('User already exists.')
                 return redirect( url_for('register') )
             user = sqlFunctions.getUserByUsername(conn, username)
