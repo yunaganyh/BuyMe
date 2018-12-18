@@ -52,14 +52,13 @@ def register():
             #retrieve user from user table to see if user already exists 
             #return error if user exists
             try:
-                row = sqlFunctions.getUserByUsername(conn, username)
+                #hash the password
+                hashed = bcrypt.hashpw(passwd1.encode('utf-8'), bcrypt.gensalt())
+                #insert user into user table and password table
+                sqlFunctions.insertUser(conn,request.form, hashed)
             except:
-                flash('That username is taken')
+                flash('User already exists.')
                 return redirect( url_for('register') )
-            #hash the password
-            hashed = bcrypt.hashpw(passwd1.encode('utf-8'), bcrypt.gensalt())
-            #insert user into user table and password table
-            sqlFunctions.insertUser(conn,request.form, hashed)
             user = sqlFunctions.getUserByUsername(conn, username)
             #create session for user
             session['username'] = username
