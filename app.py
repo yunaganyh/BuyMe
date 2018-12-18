@@ -202,9 +202,7 @@ def uploadPost():
             # assign an item to a specific user in posts table
             if 'user' in session:
                 uid = session['user']
-                sqlFunctions.insertNewItem(conn, itemDict)
-                iid = sqlFunctions.getLatestItem(conn)
-                iid = iid['last_insert_id()']
+                iid = sqlFunctions.insertNewItem(conn, itemDict)
                 sqlFunctions.insertNewPost(conn,uid,iid) 
         except Exception as err:
             flash('form submission error '+str(err))
@@ -356,4 +354,4 @@ def retrieveMessages():
 
 if __name__ == '__main__':
     app.debug = True
-    app.run('0.0.0.0',8080)
+    app.run('0.0.0.0',8081)

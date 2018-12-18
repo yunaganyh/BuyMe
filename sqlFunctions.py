@@ -8,7 +8,7 @@ import MySQLdb
 # return the connection to MySQLdb 
 def getConn(db):
     conn = MySQLdb.connect(host='localhost',
-                           user='ubuntu',
+                           user='kealani',
                            passwd='',
                            db=db)
     conn.autocommit(True)
@@ -57,10 +57,10 @@ def insertUser(conn, obj, hashed):
     curs.execute('''INSERT into userpass(username,hashed) VALUES(%s,%s)''',
                 [obj['username'], hashed])
 
-def getLastInsert(conn):
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select last_insert_id()''')
-    return curs.fetchone()
+# def getLastInsert(conn):
+#     curs = conn.cursor(MySQLdb.cursors.DictCursor)
+#     curs.execute('''select last_insert_id()''')
+#     return curs.fetchone()
 
 def getUserByUsername(conn, username):
     """Get user info from user table based
@@ -82,6 +82,9 @@ def insertNewItem(conn, item):
                     (%s,%s,%s,%s, %s,%s)''', 
                     [item['description'], item['price'], item['category'],
                     item['other'], item['photo'], item['role']])
+    curs.execute('''select last_insert_id()''')
+    iid = curs.fetchone()
+    return (iid['last_insert_id()'])
 
 def insertNewPost(conn,userDict,iid):
     """Insert item iid into posts table with
