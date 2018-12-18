@@ -52,21 +52,9 @@
     <td class="other">{{post.other}}</td>
     <td class="photo"><img src="{{url_for('blob',iid=post.iid)}}"></td>
     {% if isUser %}
-    <td><button class="update" name="update" type="submit">Update post</button></td>
-    <td>
-      <form method="post" action="{{url_for('updatePost')}}">
-        </form>
-    </td>
-    <td><button class="delete" name="delete" type="submit">Delete post</button></td>
-    <td>
-      <form method="post" action="{{url_for('deletePost')}}">
-        </form>
-    </td>
-    <td><button class="markSold" name="markSold" type="submit">Mark as Sold</button></td>
-    <td>
-      <form method="post" action="{{url_for('markPostSold')}}">
-        </form>
-    </td>
+    <td><button class="update" name="update" type="button">Update post</button></td>
+    <td><button class="delete" name="delete" type="button">Delete post</button></td>
+    <td><button class="markSold" name="markSold" type="button">Mark as Sold</button></td>
     {% endif %}
   </tr>
   {% endfor %}
@@ -110,11 +98,7 @@
   <tr data-uid={{message.uid}} data-iid={{message.iid}}>
     <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
     <td class="item">{{message.description}}</td>
-    <td><button class="openConvo" name="senderIsUser" type="submit">Open conversation</button></td>
-    <td>
-      <form method="post" action="">
-        </form>
-    </td>
+    <td><button class="openConvo" name="senderIsUser" type="button">Open conversation</button></td>
   </tr>
   {% endfor %}
 </table>
@@ -131,11 +115,7 @@
   <tr data-uid={{message.uid}} data-iid={{message.iid}}>
     <td class="sender"><a href="{{url_for('account',usernameInput=message.username)}}">{{message.username}}</td>
     <td class="item">{{message.description}}</td>
-    <td><button class="openConvo" name="senderNotUser" type="submit">Open conversation</button></td>
-    <td>
-      <form method="post" action="">
-        </form>
-    </td>
+    <td><button class="openConvo" name="senderNotUser" type="button">Open conversation</button></td> 
   </tr>
   {% endfor %}
 </table>
@@ -145,12 +125,20 @@
 <div id="updateDialog" title="Update Details For Item">
   <form id="updateForm" method='POST'>
         <h2 id="itemTitle"> Update Item </h2>
+        
         <input type="hidden" name="iid" id="iid" value="">
-        <p><label>Description <br><textarea id="description" rows="4" cols="50" maxlength="100" name="description"></textarea></label></p>
-        <p><label>Price $ <br><input id="price" type="text" name="price"></label></p>
+        
+        <p><label>Description <br>
+        <textarea id="description" rows="4" cols="50" maxlength="100" name="description"></textarea>
+        </label></p>
+        
+        <p><label>Price $ <br>
+          <input id="price" type="text" name="price">
+        </label></p>
+        
         <p><label>Category</label> <br>
              <label for="food">Food</label>
-            <input type="radio" name="category" value="food"><br>
+            <input type="radio" name="category" id="food" value="food"><br>
             
             <label for="clothing">Clothing</label>
             <input type="radio" name="category" id="clothing" value="clothing"><br>
@@ -178,8 +166,9 @@
             
             <label for="other">Other</label>
             <input type="radio" name="category" id="other" value="other">
+            
             <input type="text" name="other" value="" id="otherDesc"><br></p></label>
-        <p><button type="submit" id="updateButton">Update</button></p>
+        <p><button type="button" id="updateButton">Update</button></p>
     </form>
 </div>
 
@@ -188,7 +177,7 @@
   <input type="hidden" id="messageSender" value="">
   <table id="conversation"></table>
   <textarea id="reply" rows="4" cols="50"></textarea>
-  <p><button type=submit id="replyButton">Submit Reply</button></p>
+  <p><button type=button id="replyButton">Submit Reply</button></p>
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -198,6 +187,7 @@
 <script type="text/javascript">
   /*global $*/
 
+/* sanitize input strings from xss attacks by escaping special characters */
 function sanitize(string) {
   const map = {
       '&': '&amp;',
@@ -211,14 +201,113 @@ function sanitize(string) {
   return string.replace(reg, (match)=>(map[match]));
 }
 
-$('#replyButton').click(function(){
-  var reply = $('#reply').val();
-  var sender = $('#convoDialog #messageSender').val();
-  var iid = $('#convoDialog #messageIID').val();
-  $.post("{{url_for('messageUser')}}",
-        {'uid':sender,'description':reply,'iid':iid}, closeConvo)
+/*
+  Retrieve post information from the backend when the update button for a specific 
+  post is clicked. The information is displayed so that the user will know what 
+  previous information was entered. 
+*/
+$('#myAvailablePosts').on('click','.update',function(){
+    var postID = $(this).closest('tr').data('iid');
+    $.post("{{url_for('retrievePost')}}",{'iid':postID}, fillDialogForm);
+    $("#updateDialog").dialog("open");
 })
 
+/*
+  Deletes a post when the delete post button is clicked for a specific post.
+  iid is sent to the backend so that database is updated.
+*/
+$('#myAvailablePosts').on('click','.delete',function(){
+    var postID = $(this).closest('tr').data('iid');
+    $.post("{{url_for('deletePost')}}",{'iid':postID}, deletePostRow);
+})
+
+/* 
+  Removes post row from DOM so that the posts on the DOM reflect that the post
+  was deleted from the database 
+  */
+function deletePostRow(obj) {
+  $("[data-iid='" + obj + "']").closest("tr").remove();
+}
+
+/*
+  Marks a post as sold. Post will not be shown on main page or sale/buy pages 
+  anymore and will only be displayed on a user's account page.
+  iid is sent to the backend so that database is updated.
+*/
+$('#myAvailablePosts').on('click','.markSold',function(){
+    var postID = $(this).closest('tr').data('iid');
+    $.post("{{url_for('markPostSold')}}",{'iid':postID}, markPostAsSold);
+})
+
+/* 
+  Move post from available table to sold table so that posts on the DOM reflect 
+  that the post was marked as sold in the database 
+*/
+function markPostAsSold(obj) {
+  var row =  $("[data-iid='" + obj + "']").closest("tr");
+  $('#mySoldPosts').append(row);
+}
+
+/*
+  Retrieves and sanitizes information entered in the dialog form.
+  Post the information to backend so that information for the items database
+  will be updated to reflect new data.
+*/
+$('#updateButton').click(function(){
+  var iid = $('#updateDialog').data('iid');
+  var description = sanitize($('#description').val());
+  var price = $('#price').val();
+  var category = $("input[name=category]:checked").val();
+  var other = sanitize($('#otherDesc').val());
+  $.post("{{url_for('updatePost')}}",
+            {'description':description, 'price': price,'category':category,
+            'other':other,'iid':iid}, 
+            updatePostInfo);
+});
+
+/*
+  Closes the dialog and updates the information on the DOM so that the posts 
+  reflect the information in the databases' updated status
+*/
+function updatePostInfo(obj) {
+  $("#updateDialog").dialog("close");
+  var iid = obj['iid'];
+  var post = $("[data-iid='" + iid + "']");
+  post.closest('tr').find('.description').text(obj['description']);
+  post.closest('tr').find('.price').text(obj['price']);
+  post.closest('tr').find('.category').text(obj['category']);
+  post.closest('tr').find('.other').text(obj['other']);
+}
+
+/*
+  Fills the dialog form with item information retrieved from the backend
+*/
+function fillDialogForm(obj){
+  $('#updateDialog').data('iid',obj['iid']);
+  $('#iid').val(obj['iid']);
+  $('#itemTitle').text('Update item ' + obj['iid']);
+  $('#description').val(obj['description']);
+  $('#price').val(obj['price']);
+  $('#otherDesc').val(obj['other']);
+  if (obj['category'] == '') {
+    $("#other").prop("checked", true);
+  } else {
+    $("#" + obj['category']).prop("checked", true);
+  }
+}
+
+/* 
+  Displays all the messages between the user and another user about 
+  a unique item (identified by iid) in convoDialog
+  Fills the dialog with necessary data e.g. iid and uid of post details
+  buttonClicked's name attribute clarifies if the user is the sender of the
+  first message in the conversation
+  if user is interested in a post, they are the buyer and therefore sender of 
+  the 1st message
+  else they are the seller and therefore not the sender of the 1st message
+  This info is used to determine what to set the uid of the sender as when 
+  the reply is sent eventually
+*/
 $('#messages').on('click','.openConvo', function() {
   var iid = $(this).closest('tr').data('iid');
   var uid = $(this).closest('tr').data('uid');
@@ -229,88 +318,57 @@ $('#messages').on('click','.openConvo', function() {
   $('#convoDialog').dialog('open');
 })
 
-$('#myAvailablePosts').on('click','.update',function(){
-    var postID = $(this).closest('tr').data('iid');
-    $.post("{{url_for('retrievePost')}}",{'iid':postID}, fillDialogForm);
-    $("#updateDialog").dialog("open");
+/* 
+  Send the reply message from one user to another 
+  retrieve the message sender and receiver's IDs from pre-filled hidden input
+  values in the form, retrieve the message and send the data to the backend
+  to be stored in the database
+*/
+$('#replyButton').click(function(){
+  var reply = $('#reply').val();
+  var sender = $('#messageSender').val();
+  var iid = $('#messageIID').val();
+  $.post("{{url_for('messageUser')}}",
+        {'uid':sender,'description':reply,'iid':iid}, closeConvo)
 })
 
-$('#myAvailablePosts').on('click','.delete',function(){
-    var postID = $(this).closest('tr').data('iid');
-    $.post("{{url_for('deletePost')}}",{'iid':postID}, deletePostRow);
-})
-
-$('#myAvailablePosts').on('click','.markSold',function(){
-    var postID = $(this).closest('tr').data('iid');
-    $.post("{{url_for('markPostSold')}}",{'iid':postID}, markPostAsSold);
-})
-
-$('#updateButton').click(function(){
-  var iid = $('#updateDialog').data('iid');
-  var description = sanitize($('#description').val());
-  var price = $('#price').val();
-  var category = $("input[name=category]:checked").val();
-  var otherDesc = sanitize($('#otherDesc').val());
-  $.post("{{url_for('updatePost')}}",
-            {'description':description, 'price': price,'category':category,
-            'otherDesc':otherDesc,'iid':iid}, 
-            updatePostInfo);
-});
-
+/*
+  Fills the convoDialog with the messages between two users
+  Each row displays the message sender's username, message, and time message was
+  sent
+  Set the iid of the item in question as a value in the dialog for retrieval 
+  when the message gets sent
+  If user was not the first one to initiate the message they were the receiver
+  of the 1st message, so we set the sender of the current message to the receiver 
+  of the first message in the convo
+  Else they were the sender of the 1st message, so we set the sender of the current
+  message to the sender of the first message in the convo
+*/
 function fillConvoDialog(obj) {
   $('#conversation').empty();
   $('#reply').val('');
   if (obj['sender']=="senderNotUser"){
-    $('#convoDialog #messageSender').val(obj['messages'][0]['sender']);
+    $('#messageSender').val(obj['messages'][0]['sender']);
   } else {
-    $('#convoDialog #messageSender').val(obj['messages'][0]['receiver']);
+    $('#messageSender').val(obj['messages'][0]['receiver']);
   }
-  $('#convoDialog #messageIID').val(obj['messages'][0]['iid']);
+  $('#messageIID').val(obj['messages'][0]['iid']);
   $('#conversation').append(
-    '<tr><th>User</th><th>Message</th><th>Time sent</th></tr>')
+    '<tr class="header"><th>User</th><th>Message</th><th>Time sent</th></tr>')
   for (var message in obj['messages']){
     var m = obj['messages'][message];
-    $('#convoDialog #conversation').append('<tr><td>' + m['username'] + '</td><td>'
+    $('#conversation').append('<tr><td>' + m['username'] + '</td><td>'
     + m['message']+ '</td><td>' + m['messageSent'].split(' ').slice(0,-1).join(' ') 
     + '</td></tr>');
   }
 }
 
-function markPostAsSold(obj) {
-  var row =  $("[data-iid='" + obj + "']").closest("tr");
-  $('#mySoldPosts').append(row);
-}
-
-function deletePostRow(obj) {
-  $("[data-iid='" + obj + "']").closest("tr").remove();
-}
-
-function updatePostInfo(obj) {
-  console.log(obj);
-  var iid = obj['iid'];
-  var post = $("[data-iid='" + iid + "']");
-  post.closest('tr').find('.description').val(obj['description']);
-  post.closest('tr').find('.price').val(obj['price']);
-  post.closest('tr').find('.category').val(obj['category']);
-  post.closest('tr').find('.other').val(obj['other']);
-}
-
-function fillDialogForm(obj){
-  $('#updateDialog').data('iid',obj['iid']);
-  $('#updateDialog #iid').val(obj['iid']);
-  $('#updateDialog #itemTitle').text('Update item ' + obj['iid']);
-  $('#updateDialog #description').val(obj['description']);
-  $('#updateDialog #price').val(obj['price']);
-  $('#updateDialog #otherDesc').val(obj['other']);
-  if (obj['category'] == '') {
-    $("#updateDialog #other").prop("checked", true);
-  } else {
-    $("#updateDialog #" + obj['category']).prop("checked", true);
-  }
-}
-
+/*
+  Close dialog if message was sent successfully, else keep dialog open and alert
+  user that message was not sent successfully.
+*/
 function closeConvo(obj){
-  if (obj) {
+  if (obj != 0) {
     $('#convoDialog').dialog('close');
     alert('Message successfully sent.')
   } else{
@@ -318,10 +376,14 @@ function closeConvo(obj){
   }
 }
 
+/* 
+  Hides the two dialog forms when the page initially loads.
+  Sets how they will show and hide.
+*/
 $(document).ready(function () {
     $(function () {
         $("#updateDialog").dialog({
-
+      
             autoOpen: false,
             modal: true,
             width: 600,

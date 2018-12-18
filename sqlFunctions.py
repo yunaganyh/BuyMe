@@ -42,12 +42,6 @@ def getUser(conn, uid):
     curs.execute('''select * from user where uid = %s''',[uid])
     return curs.fetchone()
 
-# def insertUserpass(conn, username, hashed):
-#     """Inserts password for user"""
-#     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-#     curs.execute('''INSERT into userpass(username,hashed) VALUES(%s,%s)''',
-#                          [username, hashed])
-
 def insertUser(conn, obj, hashed):
     """Insert user into user table"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
@@ -56,11 +50,6 @@ def insertUser(conn, obj, hashed):
                 [obj['username'],obj['name'],obj['gradYear'],obj['dorm'],obj['email']])
     curs.execute('''INSERT into userpass(username,hashed) VALUES(%s,%s)''',
                 [obj['username'], hashed])
-
-# def getLastInsert(conn):
-#     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-#     curs.execute('''select last_insert_id()''')
-#     return curs.fetchone()
 
 def getUserByUsername(conn, username):
     """Get user info from user table based
