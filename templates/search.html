@@ -1,17 +1,5 @@
 {% extends "main.html" %}
 
-{% block htmlTop %}
-    {{super()}}
-{% endblock %}
-
-{% block buttons %}
-{{super()}}
-{% endblock %}
-
-{% block content %}
-  {{super()}}
-{% endblock %}
- 
 {% block head %}
     {% if category != '' %}
         <h1>{{category}}</h1>
@@ -21,9 +9,6 @@
     {% endif %}
 {% endblock %}
 
- {% block sale %}
-   {{super()}}
- {% endblock %}
  
  
  

@@ -1,13 +1,5 @@
 {% extends "main.html" %}
-{% block htmlTop %}
-    {{super()}}
-{% endblock %}
-
 <body>
-
-{% block flashes %}
-    {{super()}}
-{% endblock %}
             
 {% block buttons %}
 <head>
@@ -23,6 +15,7 @@
 {% endblock %}
 {% block head %}
 {% endblock %}
+
 {% block sale %}
 <form id="joinform" action="{{url_for('register')}}" method="post">
     <h1>Join</h1>
@@ -38,7 +31,7 @@
     <p><label><input type="text" name="dorm"> Dorm Location</label></p>
     <p><label><input type="password" name="password1" required> Password </label></p>
     <p><label><input type="password" name="password2" required> Password again </label></p>
-    <p><button type="submit">Submit</button></p>
+    <p><button type="submit2">Submit</button></p>
 </form>
 
 <script src="https://code.jquery.com/jquery.js"></script>

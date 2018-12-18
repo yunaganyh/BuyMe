@@ -17,3 +17,38 @@ img {
 #conversation .header {
     background-color: #d3d3d3;
 }
+
+input[type="text"] {
+      background: transparent;
+      border: none;
+      border: 2px solid lightgray;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+      border-radius: 5px;
+    }
+    
+input[type="email"] {
+      background: transparent;
+      border: none;
+      border: 2px solid lightgray;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+      border-radius: 5px;
+    }
+
+input[type="password"] {
+      background: transparent;
+      border: none;
+      border: 2px solid lightgray;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+      border-radius: 5px;
+    }
+    
+#joinform{
+        margin-left: 20px;
+    }
+    
+    
+    
+    
