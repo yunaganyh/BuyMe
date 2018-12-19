@@ -325,7 +325,7 @@ $('#messages').on('click','.openConvo', function() {
   to be stored in the database
 */
 $('#replyButton').click(function(){
-  var reply = $('#reply').val();
+  var reply = sanitize($('#reply').val());
   var sender = $('#messageSender').val();
   var iid = $('#messageIID').val();
   $.post("{{url_for('messageUser')}}",
